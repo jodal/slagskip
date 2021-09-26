@@ -81,6 +81,9 @@ impl Board {
             return Err(format!("Ship {} overlaps", ship).into());
         }
 
+        // TODO: Check if ship is placed within the board.
+
+        // XXX: This is a bit of repetition of the above iterator.
         for i in 0..size {
             let square = if horizontal {
                 &mut self.squares[x + i][y]
