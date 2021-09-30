@@ -1,4 +1,4 @@
-use battleship::game::{Board, Ship};
+use slagskip::game::{Board, Ship};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut board = Board::new(10);
