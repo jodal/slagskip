@@ -1,4 +1,5 @@
 use slagskip::game::{Board, Ship};
+use slagskip::tui;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut board = Board::new(10);
@@ -8,6 +9,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // dbg!(board);
     board.print();
+
+    tui::run()?;
 
     Ok(())
 }
