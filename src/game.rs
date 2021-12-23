@@ -5,8 +5,8 @@ pub enum Ship {
     Carrier,
     Battleship,
     Cruiser,
-    Destroyer,
     Submarine,
+    Destroyer,
 }
 
 impl Ship {
@@ -15,8 +15,8 @@ impl Ship {
             Self::Carrier => 5,
             Self::Battleship => 4,
             Self::Cruiser => 3,
+            Self::Submarine => 3,
             Self::Destroyer => 2,
-            Self::Submarine => 1,
         }
     }
 }
