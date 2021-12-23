@@ -97,14 +97,26 @@ impl Board {
     }
 
     pub fn print(&self) {
+        // Print header
+        print!("   ");
+        for x in 0..self.size {
+            print!("{:>2}", x + 1);
+        }
+        println!("");
+
         for y in 0..self.size {
+            print!("{:>2} ", index_to_char(y));
             for x in 0..self.size {
                 match self.squares[x][y].ship {
-                    Some(_ship) => print!("S"),
-                    None => print!("."),
+                    Some(_ship) => print!(" O"),
+                    None => print!(" ."),
                 }
             }
             println!("");
         }
     }
+}
+
+fn index_to_char(i: usize) -> char {
+    (65u8 + i as u8) as char
 }
