@@ -11,7 +11,7 @@ pub enum Ship {
 }
 
 impl Ship {
-    pub fn size(&self) -> usize {
+    pub fn length(&self) -> usize {
         match &self {
             Self::Carrier => 5,
             Self::Battleship => 4,
@@ -67,30 +67,27 @@ impl Board {
         (x, y): (usize, usize),
         horizontal: bool,
     ) -> Result<()> {
-        let size = ship.size();
-        let ship_squares: Vec<&Square> = (0..size)
-            .map(|i| {
-                if horizontal {
-                    &self.squares[x + i][y]
-                } else {
-                    &self.squares[x][y + i]
-                }
-            })
-            .collect();
+        let (delta_x, delta_y) = if horizontal { (1, 0) } else { (0, 1) };
 
-        if !ship_squares.iter().all(|&square| square.ship.is_none()) {
-            return Err(eyre!("Ship {ship} overlaps"));
+        // Validate the placement
+        for i in 0..ship.length() {
+            let square_x = x + i * delta_x;
+            let square_y = y + i * delta_y;
+
+            if (square_x >= self.size) || (square_y >= self.size) {
+                return Err(eyre!("{} is out of bounds", ship));
+            }
+
+            let square = &mut self.squares[square_x][square_y];
+
+            if let Some(existing_ship) = square.ship {
+                return Err(eyre!("{} overlaps with {}", ship, existing_ship));
+            }
         }
 
-        // TODO: Check if ship is placed within the board.
-
-        // XXX: This is a bit of repetition of the above iterator.
-        for i in 0..size {
-            let square = if horizontal {
-                &mut self.squares[x + i][y]
-            } else {
-                &mut self.squares[x][y + i]
-            };
+        // Actually place the ship
+        for i in 0..ship.length() {
+            let square = &mut self.squares[x + i * delta_x][y + i * delta_y];
             square.place_ship(ship);
         }
 
