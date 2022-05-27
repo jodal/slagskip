@@ -1,6 +1,7 @@
+use eyre::Result;
 use slagskip::game::{Board, Ship};
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
+fn main() -> Result<()> {
     let mut board = Board::new(10);
     board.place_ship(Ship::Carrier, (1, 1), true)?;
     board.place_ship(Ship::Battleship, (8, 2), false)?;

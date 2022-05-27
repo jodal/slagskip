@@ -1,3 +1,4 @@
+use eyre::{eyre, Result};
 use std::fmt;
 
 #[derive(Copy, Clone, Debug)]
@@ -65,7 +66,7 @@ impl Board {
         ship: Ship,
         (x, y): (usize, usize),
         horizontal: bool,
-    ) -> Result<(), String> {
+    ) -> Result<()> {
         let size = ship.size();
         let ship_squares: Vec<&Square> = (0..size)
             .map(|i| {
@@ -78,7 +79,7 @@ impl Board {
             .collect();
 
         if !ship_squares.iter().all(|&square| square.ship.is_none()) {
-            return Err(format!("Ship {} overlaps", ship).into());
+            return Err(eyre!("Ship {ship} overlaps"));
         }
 
         // TODO: Check if ship is placed within the board.

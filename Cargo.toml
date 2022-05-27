@@ -4,5 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+eyre = "0.6.8"
 tui = "0.18.0"
 termion = "1.5"
