@@ -2,6 +2,21 @@ use eyre::{eyre, Result};
 use std::fmt;
 
 #[derive(Copy, Clone, Debug)]
+pub enum Direction {
+    Horizontal,
+    Vertical,
+}
+
+impl Direction {
+    fn step(&self) -> (usize, usize) {
+        match self {
+            Direction::Horizontal => (1, 0),
+            Direction::Vertical => (0, 1),
+        }
+    }
+}
+
+#[derive(Copy, Clone, Debug)]
 pub enum Ship {
     Carrier,
     Battleship,
@@ -65,14 +80,14 @@ impl Board {
         &mut self,
         ship: Ship,
         (x, y): (usize, usize),
-        horizontal: bool,
+        direction: Direction,
     ) -> Result<()> {
-        let (delta_x, delta_y) = if horizontal { (1, 0) } else { (0, 1) };
+        let (step_x, step_y) = direction.step();
 
         // Validate the placement
         for i in 0..ship.length() {
-            let square_x = x + i * delta_x;
-            let square_y = y + i * delta_y;
+            let square_x = x + i * step_x;
+            let square_y = y + i * step_y;
 
             if (square_x >= self.size) || (square_y >= self.size) {
                 return Err(eyre!("{} is out of bounds", ship));
@@ -87,7 +102,7 @@ impl Board {
 
         // Actually place the ship
         for i in 0..ship.length() {
-            let square = &mut self.squares[x + i * delta_x][y + i * delta_y];
+            let square = &mut self.squares[x + i * step_x][y + i * step_y];
             square.place_ship(ship);
         }
 
