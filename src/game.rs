@@ -34,67 +34,6 @@ impl Player {
     }
 }
 
-#[derive(Copy, Clone, Debug)]
-pub enum Direction {
-    Horizontal,
-    Vertical,
-}
-
-impl Direction {
-    fn step(&self) -> (usize, usize) {
-        match self {
-            Self::Horizontal => (1, 0),
-            Self::Vertical => (0, 1),
-        }
-    }
-}
-
-#[derive(Copy, Clone, Debug)]
-pub enum Ship {
-    Carrier,
-    Battleship,
-    Cruiser,
-    Submarine,
-    Destroyer,
-}
-
-impl Ship {
-    pub fn length(&self) -> usize {
-        match self {
-            Self::Carrier => 5,
-            Self::Battleship => 4,
-            Self::Cruiser => 3,
-            Self::Submarine => 3,
-            Self::Destroyer => 2,
-        }
-    }
-}
-
-impl fmt::Display for Ship {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
-    }
-}
-
-#[derive(Clone, Debug)]
-struct Square {
-    ship: Option<Ship>,
-    hit: bool,
-}
-
-impl Square {
-    fn new() -> Self {
-        Square {
-            ship: None,
-            hit: false,
-        }
-    }
-
-    fn place_ship(&mut self, ship: Ship) {
-        self.ship = Some(ship);
-    }
-}
-
 #[derive(Debug)]
 pub struct Grid {
     size: usize,
@@ -169,6 +108,67 @@ impl Grid {
                 }
             }
             println!("");
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+struct Square {
+    ship: Option<Ship>,
+    hit: bool,
+}
+
+impl Square {
+    fn new() -> Self {
+        Square {
+            ship: None,
+            hit: false,
+        }
+    }
+
+    fn place_ship(&mut self, ship: Ship) {
+        self.ship = Some(ship);
+    }
+}
+
+#[derive(Copy, Clone, Debug)]
+pub enum Ship {
+    Carrier,
+    Battleship,
+    Cruiser,
+    Submarine,
+    Destroyer,
+}
+
+impl Ship {
+    pub fn length(&self) -> usize {
+        match self {
+            Self::Carrier => 5,
+            Self::Battleship => 4,
+            Self::Cruiser => 3,
+            Self::Submarine => 3,
+            Self::Destroyer => 2,
+        }
+    }
+}
+
+impl fmt::Display for Ship {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+#[derive(Copy, Clone, Debug)]
+pub enum Direction {
+    Horizontal,
+    Vertical,
+}
+
+impl Direction {
+    fn step(&self) -> (usize, usize) {
+        match self {
+            Self::Horizontal => (1, 0),
+            Self::Vertical => (0, 1),
         }
     }
 }
