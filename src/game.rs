@@ -1,40 +1,26 @@
 use eyre::{eyre, Result};
+use rand::{thread_rng, Rng};
 use std::fmt;
 
 #[derive(Debug)]
 pub struct Game {
-    pub players: Vec<Player>,
+    pub players: Vec<String>,
+    pub grids: Vec<Grid>,
     pub grid_size: usize,
 }
 
 impl Game {
     pub fn new(players: Vec<String>, grid_size: usize) -> Self {
+        let num_players = players.len();
         Self {
-            players: players
-                .into_iter()
-                .map(|name| Player::new(name, grid_size))
-                .collect(),
+            players: players,
+            grids: (0..num_players).map(|_| Grid::new(grid_size)).collect(),
             grid_size,
         }
     }
 }
 
-#[derive(Debug)]
-pub struct Player {
-    pub name: String,
-    pub grid: Grid,
-}
-
-impl Player {
-    fn new(name: String, grid_size: usize) -> Self {
-        Self {
-            name,
-            grid: Grid::new(grid_size),
-        }
-    }
-}
-
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub struct Grid {
     size: usize,
     squares: Vec<Vec<Square>>,
@@ -55,6 +41,12 @@ impl Grid {
         Some(&mut self.squares[x][y])
     }
 
+    pub fn random_square(&self) -> (usize, usize) {
+        let mut rng = thread_rng();
+        let x = rng.gen_range(0..self.size);
+        let y = rng.gen_range(0..self.size);
+        (x, y)
+    }
     pub fn place_ship(
         &mut self,
         ship: Ship,
@@ -91,6 +83,13 @@ impl Grid {
         Ok(())
     }
 
+    pub fn fire_at(&mut self, x: usize, y: usize) -> Option<Ship> {
+        match self.at(x, y) {
+            Some(square) => square.fire(),
+            None => None,
+        }
+    }
+
     pub fn print(&self) {
         // Print header
         print!("   ");
@@ -112,7 +111,7 @@ impl Grid {
     }
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 struct Square {
     ship: Option<Ship>,
     hit: bool,
@@ -129,9 +128,17 @@ impl Square {
     fn place_ship(&mut self, ship: Ship) {
         self.ship = Some(ship);
     }
+
+    fn fire(&mut self) -> Option<Ship> {
+        if self.hit {
+            return None;
+        }
+        self.hit = true;
+        self.ship
+    }
 }
 
-#[derive(Copy, Clone, Debug)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
 pub enum Ship {
     Carrier,
     Battleship,
