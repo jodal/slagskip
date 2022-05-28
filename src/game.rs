@@ -113,12 +113,12 @@ impl Board {
         // Print header
         print!("   ");
         for x in 0..self.size {
-            print!("{:>2}", x + 1);
+            print!("{:>2}", index_to_char(x));
         }
         println!("");
 
         for y in 0..self.size {
-            print!("{:>2} ", index_to_char(y));
+            print!("{:>2} ", y + 1);
             for x in 0..self.size {
                 match self.squares[x][y].ship {
                     Some(_ship) => print!(" O"),
