@@ -10,8 +10,8 @@ pub enum Direction {
 impl Direction {
     fn step(&self) -> (usize, usize) {
         match self {
-            Direction::Horizontal => (1, 0),
-            Direction::Vertical => (0, 1),
+            Self::Horizontal => (1, 0),
+            Self::Vertical => (0, 1),
         }
     }
 }
@@ -27,7 +27,7 @@ pub enum Ship {
 
 impl Ship {
     pub fn length(&self) -> usize {
-        match &self {
+        match self {
             Self::Carrier => 5,
             Self::Battleship => 4,
             Self::Cruiser => 3,
@@ -76,6 +76,13 @@ impl Grid {
         }
     }
 
+    fn at(&mut self, x: usize, y: usize) -> Option<&mut Square> {
+        if (x >= self.size) || (y >= self.size) {
+            return None;
+        }
+        Some(&mut self.squares[x][y])
+    }
+
     pub fn place_ship(
         &mut self,
         ship: Ship,
@@ -86,24 +93,27 @@ impl Grid {
 
         // Validate the placement
         for i in 0..ship.length() {
-            let square_x = x + i * step_x;
-            let square_y = y + i * step_y;
+            let pos_x = x + i * step_x;
+            let pos_y = y + i * step_y;
 
-            if (square_x >= self.size) || (square_y >= self.size) {
-                return Err(eyre!("{} is out of bounds", ship));
-            }
-
-            let square = &mut self.squares[square_x][square_y];
-
-            if let Some(existing_ship) = square.ship {
-                return Err(eyre!("{} overlaps with {}", ship, existing_ship));
+            match self.at(pos_x, pos_y) {
+                None => return Err(eyre!("{} is out of bounds", ship)),
+                Some(square) => {
+                    match square.ship {
+                        Some(existing_ship) => {
+                            return Err(eyre!("{} overlaps with {}", ship, existing_ship))
+                        }
+                        None => {} // All good: Square is within bounds and empty
+                    }
+                }
             }
         }
 
         // Actually place the ship
         for i in 0..ship.length() {
-            let square = &mut self.squares[x + i * step_x][y + i * step_y];
-            square.place_ship(ship);
+            let pos_x = x + i * step_x;
+            let pos_y = y + i * step_y;
+            self.at(pos_x, pos_y).unwrap().place_ship(ship);
         }
 
         Ok(())
