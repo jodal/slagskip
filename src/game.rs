@@ -63,14 +63,14 @@ impl Square {
 }
 
 #[derive(Debug)]
-pub struct Board {
+pub struct Grid {
     size: usize,
     squares: Vec<Vec<Square>>,
 }
 
-impl Board {
+impl Grid {
     pub fn new(size: usize) -> Self {
-        Board {
+        Grid {
             size: size,
             squares: vec![vec![Square::new(); size]; size],
         }
