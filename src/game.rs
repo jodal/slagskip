@@ -1,6 +1,39 @@
 use eyre::{eyre, Result};
 use std::fmt;
 
+#[derive(Debug)]
+pub struct Game {
+    pub players: Vec<Player>,
+    pub grid_size: usize,
+}
+
+impl Game {
+    pub fn new(players: Vec<String>, grid_size: usize) -> Self {
+        Self {
+            players: players
+                .into_iter()
+                .map(|name| Player::new(name, grid_size))
+                .collect(),
+            grid_size,
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct Player {
+    pub name: String,
+    pub grid: Grid,
+}
+
+impl Player {
+    fn new(name: String, grid_size: usize) -> Self {
+        Self {
+            name,
+            grid: Grid::new(grid_size),
+        }
+    }
+}
+
 #[derive(Copy, Clone, Debug)]
 pub enum Direction {
     Horizontal,
