@@ -101,9 +101,12 @@ impl Grid {
         for y in 0..self.size {
             print!("{:>2} ", y + 1);
             for x in 0..self.size {
-                match self.squares[x][y].ship {
-                    Some(_ship) => print!(" O"),
-                    None => print!(" ."),
+                let square = &self.squares[x][y];
+                match (square.ship, square.hit) {
+                    (Some(_ship), false) => print!(" O"),
+                    (Some(_ship), true) => print!(" X"),
+                    (None, false) => print!(" ."),
+                    (None, true) => print!(" x"),
                 }
             }
             println!("");
