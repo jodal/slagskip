@@ -13,7 +13,7 @@ impl Game {
     pub fn new(players: Vec<String>, grid_size: usize) -> Self {
         let num_players = players.len();
         Self {
-            players: players,
+            players,
             grids: (0..num_players).map(|_| Grid::new(grid_size)).collect(),
             grid_size,
         }
@@ -29,7 +29,7 @@ pub struct Grid {
 impl Grid {
     pub fn new(size: usize) -> Self {
         Grid {
-            size: size,
+            size,
             squares: vec![vec![Square::new(); size]; size],
         }
     }
@@ -63,11 +63,8 @@ impl Grid {
             match self.at(pos_x, pos_y) {
                 None => return Err(eyre!("{} is out of bounds", ship)),
                 Some(square) => {
-                    match square.ship {
-                        Some(existing_ship) => {
-                            return Err(eyre!("{} overlaps with {}", ship, existing_ship))
-                        }
-                        None => {} // All good: Square is within bounds and empty
+                    if let Some(existing_ship) = square.ship {
+                        return Err(eyre!("{} overlaps with {}", ship, existing_ship));
                     }
                 }
             }
@@ -96,7 +93,7 @@ impl Grid {
         for x in 0..self.size {
             print!("{:>2}", index_to_char(x));
         }
-        println!("");
+        println!();
 
         for y in 0..self.size {
             print!("{:>2} ", y + 1);
@@ -109,7 +106,7 @@ impl Grid {
                     (None, true) => print!(" x"),
                 }
             }
-            println!("");
+            println!();
         }
     }
 }
