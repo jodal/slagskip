@@ -31,20 +31,19 @@ fn main() -> Result<()> {
         println!();
     }
 
-    for player in game.players.iter() {
-        println!("{}: Fire!", player.name);
+    for turn in game.round() {
+        println!("{}: Fire!", turn.player.name);
 
-        for opponent in game.players.iter() {
-            if opponent == player {
-                continue; // Don't fight yourself
-            }
-
+        for opponent in turn.opponents.iter() {
             let (x, y) = opponent.grid.random_square();
-            println!("{} fires at {} ({}, {})", player.name, opponent.name, x, y);
+            println!(
+                "{} fires at {} ({}, {})",
+                turn.player.name, opponent.name, x, y
+            );
 
             match opponent.grid.fire_at(x, y) {
-                Some(ship) => println!("{} hit {}!", player.name, ship),
-                None => println!("{} missed!", player.name),
+                Some(ship) => println!("{} hit {}!", turn.player.name, ship),
+                None => println!("{} missed!", turn.player.name),
             }
         }
     }
