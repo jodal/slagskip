@@ -11,12 +11,13 @@ pub fn print_grid(grid: &Grid) {
     for y in 0..grid.size {
         print!("{:>2} ", y + 1);
         for x in 0..grid.size {
-            let square = &grid.squares[x][y];
-            match (square.ship, square.hit) {
-                (Some(_ship), false) => print!(" O"),
-                (Some(_ship), true) => print!(" X"),
-                (None, false) => print!(" ."),
-                (None, true) => print!(" x"),
+            if let Some(square) = grid.at(x, y) {
+                match (square.ship, square.hit) {
+                    (Some(_ship), false) => print!(" O"),
+                    (Some(_ship), true) => print!(" X"),
+                    (None, false) => print!(" ."),
+                    (None, true) => print!(" x"),
+                }
             }
         }
         println!();

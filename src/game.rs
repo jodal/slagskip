@@ -1,6 +1,6 @@
 use eyre::{eyre, Result};
 use rand::{thread_rng, Rng};
-use std::fmt;
+use std::{cell::RefCell, fmt};
 
 #[derive(Debug)]
 pub struct Game {
@@ -21,22 +21,22 @@ impl Game {
 #[derive(Debug, Eq, PartialEq)]
 pub struct Grid {
     pub size: usize,
-    pub squares: Vec<Vec<Square>>,
+    pub squares: RefCell<Vec<Vec<Square>>>,
 }
 
 impl Grid {
     pub fn new(size: usize) -> Self {
         Grid {
             size,
-            squares: vec![vec![Square::new(); size]; size],
+            squares: RefCell::new(vec![vec![Square::new(); size]; size]),
         }
     }
 
-    fn at(&mut self, x: usize, y: usize) -> Option<&mut Square> {
+    pub fn at(&self, x: usize, y: usize) -> Option<Square> {
         if (x >= self.size) || (y >= self.size) {
             return None;
         }
-        Some(&mut self.squares[x][y])
+        Some(self.squares.borrow()[x][y].clone())
     }
 
     pub fn random_square(&self) -> (usize, usize) {
@@ -45,8 +45,9 @@ impl Grid {
         let y = rng.gen_range(0..self.size);
         (x, y)
     }
+
     pub fn place_ship(
-        &mut self,
+        &self,
         ship: Ship,
         (x, y): (usize, usize),
         direction: Direction,
@@ -72,16 +73,16 @@ impl Grid {
         for i in 0..ship.length() {
             let pos_x = x + i * step_x;
             let pos_y = y + i * step_y;
-            self.at(pos_x, pos_y).unwrap().place_ship(ship);
+            self.squares.borrow_mut()[pos_x][pos_y].place_ship(ship);
         }
 
         Ok(())
     }
 
-    pub fn fire_at(&mut self, x: usize, y: usize) -> Option<Ship> {
+    pub fn fire_at(&self, x: usize, y: usize) -> Option<Ship> {
         match self.at(x, y) {
-            Some(square) => square.fire(),
             None => None,
+            Some(_) => self.squares.borrow_mut()[x][y].fire(),
         }
     }
 }
