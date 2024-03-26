@@ -4,18 +4,27 @@ use std::{cell::RefCell, fmt};
 
 #[derive(Debug)]
 pub struct Game {
-    pub players: Vec<String>,
-    pub grids: Vec<Grid>,
+    pub players: Vec<Player>,
 }
 
 impl Game {
-    pub fn new(players: Vec<String>, grid_size: usize) -> Self {
-        let num_players = players.len();
+    pub fn new(player_names: Vec<String>, grid_size: usize) -> Self {
         Self {
-            players,
-            grids: (0..num_players).map(|_| Grid::new(grid_size)).collect(),
+            players: player_names
+                .iter()
+                .map(|name| Player {
+                    name: name.to_string(),
+                    grid: Grid::new(grid_size),
+                })
+                .collect(),
         }
     }
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub struct Player {
+    pub name: String,
+    pub grid: Grid,
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -165,10 +174,9 @@ mod tests {
         let game = Game::new(vec!["Alice".to_string(), "Bob".to_string()], 10);
 
         assert_eq!(game.players.len(), 2);
-        assert_eq!(game.players[0], "Alice");
-        assert_eq!(game.players[1], "Bob");
-        assert_eq!(game.grids.len(), 2);
-        assert_eq!(game.grids[0].size, 10);
-        assert_eq!(game.grids[1].size, 10);
+        assert_eq!(game.players[0].name, "Alice");
+        assert_eq!(game.players[0].grid.size, 10);
+        assert_eq!(game.players[1].name, "Bob");
+        assert_eq!(game.players[1].grid.size, 10);
     }
 }
