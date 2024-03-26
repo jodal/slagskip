@@ -6,7 +6,6 @@ use std::fmt;
 pub struct Game {
     pub players: Vec<String>,
     pub grids: Vec<Grid>,
-    pub grid_size: usize,
 }
 
 impl Game {
@@ -15,7 +14,6 @@ impl Game {
         Self {
             players,
             grids: (0..num_players).map(|_| Grid::new(grid_size)).collect(),
-            grid_size,
         }
     }
 }
