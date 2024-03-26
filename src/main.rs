@@ -1,5 +1,8 @@
 use eyre::Result;
-use slagskip::game::{Direction, Game, Ship};
+use slagskip::{
+    cli::print_grid,
+    game::{Direction, Game, Ship},
+};
 
 fn main() -> Result<()> {
     let mut game = Game::new(vec!["Alice".to_string(), "Bob".to_string()], 10);
@@ -15,7 +18,7 @@ fn main() -> Result<()> {
         grid.place_ship(Ship::Destroyer, (5, 6), Direction::Horizontal)?;
 
         println!();
-        grid.print();
+        print_grid(grid);
         println!();
     }
 
@@ -43,7 +46,7 @@ fn main() -> Result<()> {
 
         println!("Grid of {}", player_name);
         println!();
-        grid.print();
+        print_grid(grid);
         println!();
     }
 

@@ -20,8 +20,8 @@ impl Game {
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct Grid {
-    size: usize,
-    squares: Vec<Vec<Square>>,
+    pub size: usize,
+    pub squares: Vec<Vec<Square>>,
 }
 
 impl Grid {
@@ -84,35 +84,12 @@ impl Grid {
             None => None,
         }
     }
-
-    pub fn print(&self) {
-        // Print header
-        print!("   ");
-        for x in 0..self.size {
-            print!("{:>2}", index_to_char(x));
-        }
-        println!();
-
-        for y in 0..self.size {
-            print!("{:>2} ", y + 1);
-            for x in 0..self.size {
-                let square = &self.squares[x][y];
-                match (square.ship, square.hit) {
-                    (Some(_ship), false) => print!(" O"),
-                    (Some(_ship), true) => print!(" X"),
-                    (None, false) => print!(" ."),
-                    (None, true) => print!(" x"),
-                }
-            }
-            println!();
-        }
-    }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-struct Square {
-    ship: Option<Ship>,
-    hit: bool,
+pub struct Square {
+    pub ship: Option<Ship>,
+    pub hit: bool,
 }
 
 impl Square {
@@ -176,8 +153,4 @@ impl Direction {
             Self::Vertical => (0, 1),
         }
     }
-}
-
-fn index_to_char(i: usize) -> char {
-    (65u8 + i as u8) as char
 }
