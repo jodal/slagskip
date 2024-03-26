@@ -154,3 +154,20 @@ impl Direction {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn new_inits_players_and_grids() {
+        let game = Game::new(vec!["Alice".to_string(), "Bob".to_string()], 10);
+
+        assert_eq!(game.players.len(), 2);
+        assert_eq!(game.players[0], "Alice");
+        assert_eq!(game.players[1], "Bob");
+        assert_eq!(game.grids.len(), 2);
+        assert_eq!(game.grids[0].size, 10);
+        assert_eq!(game.grids[1].size, 10);
+    }
+}
