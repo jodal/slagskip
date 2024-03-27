@@ -18,6 +18,10 @@ impl Grid {
         }
     }
 
+    pub fn points(&self) -> PointIter {
+        PointIter::new(&self.points)
+    }
+
     pub(crate) fn at(&self, x: usize, y: usize) -> Option<&Point> {
         if (x >= self.size) || (y >= self.size) {
             return None;
@@ -123,6 +127,46 @@ impl Point {
         }
         *self.hit.borrow_mut() = true;
         self.has_ship()
+    }
+}
+
+pub struct PointIter<'a> {
+    points: &'a Vec<Vec<Point>>,
+    row_index: usize,
+    column_index: usize,
+}
+
+impl<'a> PointIter<'a> {
+    fn new(points: &'a Vec<Vec<Point>>) -> Self {
+        Self {
+            points,
+            row_index: 0,
+            column_index: 0,
+        }
+    }
+}
+
+impl<'a> Iterator for PointIter<'a> {
+    type Item = &'a Point;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        // Check if the current row is exhausted
+        while self.row_index < self.points.len()
+            && self.column_index >= self.points[self.row_index].len()
+        {
+            self.row_index += 1;
+            self.column_index = 0;
+        }
+
+        // Check if all rows are exhausted
+        if self.row_index >= self.points.len() {
+            return None;
+        }
+
+        // Get the current item and move the iterator forward
+        let item = &self.points[self.row_index][self.column_index];
+        self.column_index += 1;
+        Some(item)
     }
 }
 
