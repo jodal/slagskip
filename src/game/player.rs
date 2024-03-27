@@ -1,4 +1,6 @@
-use super::Grid;
+use eyre::Result;
+
+use super::{Direction, Grid, Ship};
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct Player {
@@ -12,6 +14,21 @@ impl Player {
             name: name.to_string(),
             grid: Grid::new(grid_size),
         }
+    }
+
+    pub fn place_ships_randomly(&self) -> Result<()> {
+        // TODO Random placement ot make this more interesting
+        self.grid
+            .place_ship(Ship::Carrier, (1, 1), Direction::Horizontal)?;
+        self.grid
+            .place_ship(Ship::Battleship, (8, 2), Direction::Vertical)?;
+        self.grid
+            .place_ship(Ship::Cruiser, (3, 7), Direction::Vertical)?;
+        self.grid
+            .place_ship(Ship::Submarine, (0, 4), Direction::Horizontal)?;
+        self.grid
+            .place_ship(Ship::Destroyer, (5, 6), Direction::Horizontal)?;
+        Ok(())
     }
 
     pub fn status(&self) -> PlayerStatus {

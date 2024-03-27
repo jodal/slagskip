@@ -1,35 +1,20 @@
 use eyre::Result;
-use slagskip::{
-    cli::print_grid,
-    game::{Direction, Game, Ship},
-};
+use slagskip::{cli::print_grid, game::NewGame};
 
 fn main() -> Result<()> {
-    let game = Game::new(vec!["Alice".to_string(), "Bob".to_string()], 10);
+    let mut new_game = NewGame::new(10);
+    new_game.add_player("Alice");
+    new_game.add_player("Bob");
 
-    for player in game.players.iter() {
+    for player in new_game.players.iter() {
         println!("{}: Place your ships", player.name);
-
-        player
-            .grid
-            .place_ship(Ship::Carrier, (1, 1), Direction::Horizontal)?;
-        player
-            .grid
-            .place_ship(Ship::Battleship, (8, 2), Direction::Vertical)?;
-        player
-            .grid
-            .place_ship(Ship::Cruiser, (3, 7), Direction::Vertical)?;
-        player
-            .grid
-            .place_ship(Ship::Submarine, (0, 4), Direction::Horizontal)?;
-        player
-            .grid
-            .place_ship(Ship::Destroyer, (5, 6), Direction::Horizontal)?;
-
+        player.place_ships_randomly()?;
         println!();
         print_grid(&player.grid);
         println!();
     }
+
+    let game = new_game.start()?;
 
     for turn in game.round() {
         println!("{}: Fire!", turn.player.name);
