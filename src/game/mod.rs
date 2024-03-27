@@ -45,6 +45,34 @@ impl Player {
             grid: Grid::new(grid_size),
         }
     }
+
+    pub fn status(&self) -> PlayerStatus {
+        let num_placed = self
+            .grid
+            .points()
+            .filter(|p| p.has_ship().is_some())
+            .count();
+        let num_hit = self
+            .grid
+            .points()
+            .filter(|p| p.has_ship().is_some() && p.is_hit())
+            .count();
+
+        if num_placed == 0 {
+            return PlayerStatus::SETUP;
+        }
+        if num_hit == num_placed {
+            return PlayerStatus::DEAD;
+        }
+        return PlayerStatus::PLAYING;
+    }
+}
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub enum PlayerStatus {
+    SETUP,
+    PLAYING,
+    DEAD,
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -61,6 +89,8 @@ impl<'a> Turn<'a> {
 
 #[cfg(test)]
 mod tests {
+    use eyre::Result;
+
     use super::*;
 
     #[test]
@@ -93,5 +123,37 @@ mod tests {
         assert_eq!(*turns[2].player, game.players[2]);
         assert_eq!(*turns[2].opponents[0], game.players[0]);
         assert_eq!(*turns[2].opponents[1], game.players[1]);
+    }
+
+    #[test]
+    fn status_checks_if_any_ships_remain() -> Result<()> {
+        let player = Player::new("Alice", 3);
+        assert_eq!(player.status(), PlayerStatus::SETUP);
+
+        player
+            .grid
+            .place_ship(Ship::Submarine, (0, 0), Direction::Horizontal)?;
+        // TODO Keep track of how many ships should be placed, so that we can stay in SETUP until all are placed.
+        // assert_eq!(player.status(), PlayerStatus::SETUP);
+
+        assert_eq!(player.status(), PlayerStatus::PLAYING);
+
+        // A miss
+        player.grid.fire_at(1, 0);
+        assert_eq!(player.status(), PlayerStatus::PLAYING);
+
+        // One hit
+        player.grid.fire_at(0, 0);
+        assert_eq!(player.status(), PlayerStatus::PLAYING);
+
+        // Two hits
+        player.grid.fire_at(1, 0);
+        assert_eq!(player.status(), PlayerStatus::PLAYING);
+
+        // Three hits, the single ship is sunken
+        player.grid.fire_at(2, 0);
+        assert_eq!(player.status(), PlayerStatus::DEAD);
+
+        Ok(())
     }
 }

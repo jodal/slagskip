@@ -1,5 +1,5 @@
 use eyre::Result;
-use slagskip::game::{Direction, Game, Ship};
+use slagskip::game::{Direction, Game, PlayerStatus, Ship};
 
 #[test]
 fn one_ship_game() -> Result<()> {
@@ -9,6 +9,9 @@ fn one_ship_game() -> Result<()> {
     assert_eq!(alice.name, "Alice");
     let bob = &game.players[1];
     assert_eq!(bob.name, "Bob");
+
+    assert_eq!(alice.status(), PlayerStatus::SETUP);
+    assert_eq!(bob.status(), PlayerStatus::SETUP);
 
     // Place ships
     alice
@@ -34,6 +37,9 @@ fn one_ship_game() -> Result<()> {
         bob.grid.to_string(),
         ["x..O.", ".x.O.", "..xO.", "...X.", "...Ox"].join("\n")
     );
+
+    assert_eq!(alice.status(), PlayerStatus::PLAYING);
+    assert_eq!(bob.status(), PlayerStatus::PLAYING);
 
     Ok(())
 }
