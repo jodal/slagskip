@@ -47,20 +47,20 @@ impl Player {
     }
 
     pub fn status(&self) -> PlayerStatus {
-        let num_placed = self.grid.cells().filter(|p| p.has_ship().is_some()).count();
-        let num_hit = self
-            .grid
-            .cells()
-            .filter(|p| p.has_ship().is_some() && p.is_hit())
-            .count();
-
-        if num_placed == 0 {
+        if self.grid.to_place.borrow().len() != 0 {
             return PlayerStatus::SETUP;
         }
-        if num_hit == num_placed {
-            return PlayerStatus::DEAD;
+
+        let num_alive = self
+            .grid
+            .cells()
+            .filter(|p| p.has_ship().is_some() && !p.is_hit())
+            .count();
+
+        if num_alive > 0 {
+            return PlayerStatus::PLAYING;
         }
-        return PlayerStatus::PLAYING;
+        return PlayerStatus::DEAD;
     }
 }
 
@@ -129,25 +129,39 @@ mod tests {
         player
             .grid
             .place_ship(Ship::Submarine, (0, 0), Direction::Horizontal)?;
-        // TODO Keep track of how many ships should be placed, so that we can stay in SETUP until all are placed.
-        // assert_eq!(player.status(), PlayerStatus::SETUP);
 
+        // There are more ships to place
+        assert_eq!(player.status(), PlayerStatus::SETUP);
+
+        player
+            .grid
+            .place_ship(Ship::Cruiser, (0, 1), Direction::Horizontal)?;
+        player
+            .grid
+            .place_ship(Ship::Destroyer, (0, 2), Direction::Horizontal)?;
+
+        // All ships have been placed
         assert_eq!(player.status(), PlayerStatus::PLAYING);
 
         // A miss
-        player.grid.fire_at(1, 0);
+        player.grid.fire_at(2, 2);
         assert_eq!(player.status(), PlayerStatus::PLAYING);
 
-        // One hit
+        // Sink Submarine
         player.grid.fire_at(0, 0);
-        assert_eq!(player.status(), PlayerStatus::PLAYING);
-
-        // Two hits
         player.grid.fire_at(1, 0);
+        player.grid.fire_at(2, 0);
         assert_eq!(player.status(), PlayerStatus::PLAYING);
 
-        // Three hits, the single ship is sunken
-        player.grid.fire_at(2, 0);
+        // Sink Cruiser
+        player.grid.fire_at(0, 1);
+        player.grid.fire_at(1, 1);
+        player.grid.fire_at(2, 1);
+        assert_eq!(player.status(), PlayerStatus::PLAYING);
+
+        // Sink Destroyer
+        player.grid.fire_at(0, 2);
+        player.grid.fire_at(1, 2);
         assert_eq!(player.status(), PlayerStatus::DEAD);
 
         Ok(())
