@@ -82,10 +82,7 @@ impl Grid {
     }
 
     pub fn fire_at(&self, x: usize, y: usize) -> Option<Ship> {
-        match self.at(x, y) {
-            None => None,
-            Some(_) => self.cells[x][y].fire(),
-        }
+        self.at(x, y).and_then(|cell| cell.fire())
     }
 
     pub fn to_string(&self) -> String {
