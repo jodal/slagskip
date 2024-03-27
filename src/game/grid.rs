@@ -7,6 +7,7 @@ use super::{Direction, Ship};
 #[derive(Debug, Eq, PartialEq)]
 pub struct Grid {
     pub size: usize,
+    to_place: RefCell<Vec<Ship>>,
     points: Vec<Vec<Point>>,
 }
 
@@ -14,6 +15,7 @@ impl Grid {
     pub fn new(size: usize) -> Self {
         Grid {
             size,
+            to_place: RefCell::new(Ship::for_grid(size)),
             points: vec![vec![Point::new(); size]; size],
         }
     }
@@ -42,6 +44,18 @@ impl Grid {
         (x, y): (usize, usize),
         direction: Direction,
     ) -> Result<()> {
+        // Remove ship from self.to_place
+        let mut to_place = self.to_place.borrow_mut();
+        if let Some(index) = to_place.iter().position(|s| *s == ship) {
+            to_place.remove(index);
+        } else {
+            return Err(eyre!(
+                "Tried placing {}; expected one of {:?}.",
+                ship,
+                to_place
+            ));
+        }
+
         let (step_x, step_y) = direction.step();
 
         // Validate the placement
@@ -224,6 +238,18 @@ mod tests {
 
         // When a destroyer is placed overlapping the carrier: CCCCDD....
         let result = grid.place_ship(Ship::Destroyer, (4, 0), Direction::Horizontal);
+
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn place_same_ship_twice() {
+        let grid = Grid::new(3);
+
+        grid.place_ship(Ship::Destroyer, (0, 0), Direction::Horizontal)
+            .unwrap();
+
+        let result = grid.place_ship(Ship::Destroyer, (0, 1), Direction::Horizontal);
 
         assert!(result.is_err());
     }
