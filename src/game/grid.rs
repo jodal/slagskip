@@ -99,3 +99,83 @@ impl Point {
         self.ship
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn random_point() {
+        let grid_size = 10;
+        let grid = Grid::new(grid_size);
+
+        let (x, y) = grid.random_point();
+
+        assert!(x < grid_size);
+        assert!(y < grid_size);
+    }
+
+    #[test]
+    fn place_ship_horizontal() {
+        let grid = Grid::new(10);
+
+        grid.place_ship(Ship::Destroyer, (0, 0), Direction::Horizontal)
+            .unwrap();
+
+        assert_eq!(grid.at(0, 0).unwrap().ship, Some(Ship::Destroyer));
+        assert_eq!(grid.at(1, 0).unwrap().ship, Some(Ship::Destroyer));
+        assert_eq!(grid.at(2, 0).unwrap().ship, None);
+    }
+
+    #[test]
+    fn place_ship_vertical() {
+        let grid = Grid::new(10);
+
+        grid.place_ship(Ship::Destroyer, (1, 1), Direction::Vertical)
+            .unwrap();
+
+        assert_eq!(grid.at(1, 1).unwrap().ship, Some(Ship::Destroyer));
+        assert_eq!(grid.at(1, 2).unwrap().ship, Some(Ship::Destroyer));
+        assert_eq!(grid.at(1, 3).unwrap().ship, None);
+    }
+
+    #[test]
+    fn place_ship_out_of_bounds() {
+        let grid = Grid::new(10);
+
+        // When a destroyer of length two is placed on the last point on a row
+        let result = grid.place_ship(Ship::Destroyer, (9, 0), Direction::Horizontal);
+
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn place_ship_overlapping_existing_ship() {
+        let grid = Grid::new(10);
+        // Given a carrier in the first five points: CCCCC.....
+        grid.place_ship(Ship::Carrier, (0, 0), Direction::Horizontal)
+            .unwrap();
+
+        // When a destroyer is placed overlapping the carrier: CCCCDD....
+        let result = grid.place_ship(Ship::Destroyer, (4, 0), Direction::Horizontal);
+
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn fire_at() {
+        // Given a carrier: CCCCC.....
+        let grid = Grid::new(10);
+        grid.place_ship(Ship::Carrier, (0, 0), Direction::Horizontal)
+            .unwrap();
+
+        // CCCCCx.... is a miss
+        assert_eq!(grid.fire_at(5, 0), None);
+
+        // CCCXCx.... is a hit
+        assert_eq!(grid.fire_at(3, 0), Some(Ship::Carrier));
+
+        // Another hit in the same spot is a miss as there is no longer anything there
+        assert_eq!(grid.fire_at(3, 0), None);
+    }
+}
