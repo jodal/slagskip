@@ -1,7 +1,7 @@
 mod grid;
 mod ship;
 
-pub use crate::game::grid::{Grid, Point};
+pub use crate::game::grid::{Cell, Grid};
 pub use crate::game::ship::{Direction, Ship};
 
 #[derive(Debug)]
@@ -47,14 +47,10 @@ impl Player {
     }
 
     pub fn status(&self) -> PlayerStatus {
-        let num_placed = self
-            .grid
-            .points()
-            .filter(|p| p.has_ship().is_some())
-            .count();
+        let num_placed = self.grid.cells().filter(|p| p.has_ship().is_some()).count();
         let num_hit = self
             .grid
-            .points()
+            .cells()
             .filter(|p| p.has_ship().is_some() && p.is_hit())
             .count();
 

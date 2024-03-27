@@ -8,7 +8,7 @@ use super::{Direction, Ship};
 pub struct Grid {
     pub size: usize,
     to_place: RefCell<Vec<Ship>>,
-    points: Vec<Vec<Point>>,
+    cells: Vec<Vec<Cell>>,
 }
 
 impl Grid {
@@ -16,19 +16,19 @@ impl Grid {
         Grid {
             size,
             to_place: RefCell::new(Ship::for_grid(size)),
-            points: vec![vec![Point::new(); size]; size],
+            cells: vec![vec![Cell::new(); size]; size],
         }
     }
 
-    pub fn points(&self) -> PointIter {
-        PointIter::new(&self.points)
+    pub fn cells(&self) -> CellIter {
+        CellIter::new(&self.cells)
     }
 
-    pub(crate) fn at(&self, x: usize, y: usize) -> Option<&Point> {
+    pub(crate) fn at(&self, x: usize, y: usize) -> Option<&Cell> {
         if (x >= self.size) || (y >= self.size) {
             return None;
         }
-        Some(&self.points[x][y])
+        Some(&self.cells[x][y])
     }
 
     pub fn random_point(&self) -> (usize, usize) {
@@ -65,8 +65,8 @@ impl Grid {
 
             match self.at(pos_x, pos_y) {
                 None => return Err(eyre!("{} is out of bounds", ship)),
-                Some(square) => {
-                    if let Some(existing_ship) = square.has_ship() {
+                Some(cell) => {
+                    if let Some(existing_ship) = cell.has_ship() {
                         return Err(eyre!("{} overlaps with {}", ship, existing_ship));
                     }
                 }
@@ -75,7 +75,7 @@ impl Grid {
 
         // Actually place the ship
         for i in 0..ship.length() {
-            self.points[x + i * step_x][y + i * step_y].place_ship(ship);
+            self.cells[x + i * step_x][y + i * step_y].place_ship(ship);
         }
 
         Ok(())
@@ -84,7 +84,7 @@ impl Grid {
     pub fn fire_at(&self, x: usize, y: usize) -> Option<Ship> {
         match self.at(x, y) {
             None => None,
-            Some(_) => self.points[x][y].fire(),
+            Some(_) => self.cells[x][y].fire(),
         }
     }
 
@@ -92,8 +92,8 @@ impl Grid {
         let mut result = String::with_capacity((self.size + 1) * self.size - 1);
         for y in 0..self.size {
             for x in 0..self.size {
-                if let Some(point) = self.at(x, y) {
-                    match (point.has_ship(), point.is_hit()) {
+                if let Some(cell) = self.at(x, y) {
+                    match (cell.has_ship(), cell.is_hit()) {
                         (Some(_ship), false) => result.push('O'),
                         (Some(_ship), true) => result.push('X'),
                         (None, false) => result.push('.'),
@@ -110,14 +110,14 @@ impl Grid {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Point {
+pub struct Cell {
     ship: RefCell<Option<Ship>>,
     hit: RefCell<bool>,
 }
 
-impl Point {
+impl Cell {
     fn new() -> Self {
-        Point {
+        Cell {
             ship: RefCell::new(None),
             hit: RefCell::new(false),
         }
@@ -144,41 +144,41 @@ impl Point {
     }
 }
 
-pub struct PointIter<'a> {
-    points: &'a Vec<Vec<Point>>,
+pub struct CellIter<'a> {
+    cells: &'a Vec<Vec<Cell>>,
     row_index: usize,
     column_index: usize,
 }
 
-impl<'a> PointIter<'a> {
-    fn new(points: &'a Vec<Vec<Point>>) -> Self {
+impl<'a> CellIter<'a> {
+    fn new(cells: &'a Vec<Vec<Cell>>) -> Self {
         Self {
-            points,
+            cells,
             row_index: 0,
             column_index: 0,
         }
     }
 }
 
-impl<'a> Iterator for PointIter<'a> {
-    type Item = &'a Point;
+impl<'a> Iterator for CellIter<'a> {
+    type Item = &'a Cell;
 
     fn next(&mut self) -> Option<Self::Item> {
         // Check if the current row is exhausted
-        while self.row_index < self.points.len()
-            && self.column_index >= self.points[self.row_index].len()
+        while self.row_index < self.cells.len()
+            && self.column_index >= self.cells[self.row_index].len()
         {
             self.row_index += 1;
             self.column_index = 0;
         }
 
         // Check if all rows are exhausted
-        if self.row_index >= self.points.len() {
+        if self.row_index >= self.cells.len() {
             return None;
         }
 
         // Get the current item and move the iterator forward
-        let item = &self.points[self.row_index][self.column_index];
+        let item = &self.cells[self.row_index][self.column_index];
         self.column_index += 1;
         Some(item)
     }
@@ -223,7 +223,7 @@ mod tests {
     fn place_ship_out_of_bounds() {
         let grid = Grid::new(10);
 
-        // When a destroyer of length two is placed on the last point on a row
+        // When a destroyer of length two is placed on the last cell on a row
         let result = grid.place_ship(Ship::Destroyer, (9, 0), Direction::Horizontal);
 
         assert!(result.is_err());
@@ -232,7 +232,7 @@ mod tests {
     #[test]
     fn place_ship_overlapping_existing_ship() {
         let grid = Grid::new(10);
-        // Given a carrier in the first five points: CCCCC.....
+        // Given a carrier in the first five cells: CCCCC.....
         grid.place_ship(Ship::Carrier, (0, 0), Direction::Horizontal)
             .unwrap();
 
