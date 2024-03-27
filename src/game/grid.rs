@@ -7,25 +7,25 @@ use super::{Direction, Ship};
 #[derive(Debug, Eq, PartialEq)]
 pub struct Grid {
     pub size: usize,
-    pub squares: RefCell<Vec<Vec<Square>>>,
+    pub points: RefCell<Vec<Vec<Point>>>,
 }
 
 impl Grid {
     pub fn new(size: usize) -> Self {
         Grid {
             size,
-            squares: RefCell::new(vec![vec![Square::new(); size]; size]),
+            points: RefCell::new(vec![vec![Point::new(); size]; size]),
         }
     }
 
-    pub fn at(&self, x: usize, y: usize) -> Option<Square> {
+    pub fn at(&self, x: usize, y: usize) -> Option<Point> {
         if (x >= self.size) || (y >= self.size) {
             return None;
         }
-        Some(self.squares.borrow()[x][y].clone())
+        Some(self.points.borrow()[x][y].clone())
     }
 
-    pub fn random_square(&self) -> (usize, usize) {
+    pub fn random_point(&self) -> (usize, usize) {
         let mut rng = thread_rng();
         let x = rng.gen_range(0..self.size);
         let y = rng.gen_range(0..self.size);
@@ -59,7 +59,7 @@ impl Grid {
         for i in 0..ship.length() {
             let pos_x = x + i * step_x;
             let pos_y = y + i * step_y;
-            self.squares.borrow_mut()[pos_x][pos_y].place_ship(ship);
+            self.points.borrow_mut()[pos_x][pos_y].place_ship(ship);
         }
 
         Ok(())
@@ -68,20 +68,20 @@ impl Grid {
     pub fn fire_at(&self, x: usize, y: usize) -> Option<Ship> {
         match self.at(x, y) {
             None => None,
-            Some(_) => self.squares.borrow_mut()[x][y].fire(),
+            Some(_) => self.points.borrow_mut()[x][y].fire(),
         }
     }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Square {
+pub struct Point {
     pub ship: Option<Ship>,
     pub hit: bool,
 }
 
-impl Square {
+impl Point {
     fn new() -> Self {
-        Square {
+        Point {
             ship: None,
             hit: false,
         }

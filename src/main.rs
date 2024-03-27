@@ -35,7 +35,7 @@ fn main() -> Result<()> {
         println!("{}: Fire!", turn.player.name);
 
         for opponent in turn.opponents.iter() {
-            let (x, y) = opponent.grid.random_square();
+            let (x, y) = opponent.grid.random_point();
             println!(
                 "{} fires at {} ({}, {})",
                 turn.player.name, opponent.name, x, y

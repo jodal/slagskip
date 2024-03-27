@@ -1,7 +1,7 @@
 mod grid;
 mod ship;
 
-pub use crate::game::grid::{Grid, Square};
+pub use crate::game::grid::{Grid, Point};
 pub use crate::game::ship::{Direction, Ship};
 
 #[derive(Debug)]
