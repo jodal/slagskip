@@ -62,7 +62,7 @@ pub struct Turn<'a> {
 }
 
 impl<'a> Turn<'a> {
-    pub fn new(player: &'a Player, opponents: Vec<&'a Player>) -> Self {
+    fn new(player: &'a Player, opponents: Vec<&'a Player>) -> Self {
         Self { player, opponents }
     }
 }
