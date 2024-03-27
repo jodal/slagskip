@@ -20,15 +20,19 @@ fn main() -> Result<()> {
         println!("{}: Fire!", turn.player.name);
 
         for opponent in turn.opponents.iter() {
-            let (x, y) = opponent.grid.random_point();
-            println!(
-                "{} fires at {} ({}, {})",
-                turn.player.name, opponent.name, x, y
-            );
-
-            match opponent.fire_at(x, y) {
-                Some(ship) => println!("{} hit {}!", turn.player.name, ship),
-                None => println!("{} missed!", turn.player.name),
+            match opponent.fire_at_random() {
+                Some(((x, y), Some(ship))) => {
+                    println!(
+                        "{} fired at {},{} and hit {}!",
+                        turn.player.name, x, y, ship
+                    );
+                }
+                Some(((x, y), None)) => {
+                    println!("{} fired at {},{} and hit nothing.", turn.player.name, x, y);
+                }
+                None => {
+                    println!("No more cells to hit!")
+                }
             }
         }
     }

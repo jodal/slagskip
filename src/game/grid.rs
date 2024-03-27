@@ -28,11 +28,11 @@ impl Grid {
         Some(&self.cells[x][y])
     }
 
-    pub fn random_point(&self) -> (usize, usize) {
+    pub(crate) fn random_cell(&self) -> ((usize, usize), &Cell) {
         let mut rng = thread_rng();
         let x = rng.gen_range(0..self.size);
         let y = rng.gen_range(0..self.size);
-        (x, y)
+        ((x, y), self.at(x, y).unwrap())
     }
 
     pub fn to_string(&self) -> String {
@@ -142,13 +142,14 @@ mod tests {
     }
 
     #[test]
-    fn random_point() {
+    fn random_cell() {
         let grid_size = 10;
         let grid = Grid::new(grid_size);
 
-        let (x, y) = grid.random_point();
+        let ((x, y), cell) = grid.random_cell();
 
         assert!(x < grid_size);
         assert!(y < grid_size);
+        assert_eq!(grid.at(x, y).unwrap(), cell);
     }
 }

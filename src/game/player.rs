@@ -79,6 +79,22 @@ impl Player {
         self.grid.at(x, y).and_then(|cell| cell.fire())
     }
 
+    pub fn fire_at_random(&self) -> Option<((usize, usize), Option<Ship>)> {
+        let max_attempts = self.grid.size * self.grid.size;
+        for _ in 0..max_attempts {
+            let ((x, y), cell) = self.grid.random_cell();
+            match cell.is_hit() {
+                true => {
+                    // Select a new cell to hit
+                }
+                false => {
+                    return Some(((x, y), cell.fire()));
+                }
+            }
+        }
+        None
+    }
+
     pub fn status(&self) -> PlayerStatus {
         if self.to_place.borrow().len() != 0 {
             return PlayerStatus::SETUP;
