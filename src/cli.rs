@@ -8,17 +8,10 @@ pub fn print_grid(grid: &Grid) {
     }
     println!();
 
-    for y in 0..grid.size {
+    for (y, row) in grid.to_string().lines().enumerate() {
         print!("{:>2} ", y + 1);
-        for x in 0..grid.size {
-            if let Some(point) = grid.at(x, y) {
-                match (point.ship, point.hit) {
-                    (Some(_ship), false) => print!(" O"),
-                    (Some(_ship), true) => print!(" X"),
-                    (None, false) => print!(" ."),
-                    (None, true) => print!(" x"),
-                }
-            }
+        for ch in row.chars() {
+            print!(" {}", ch);
         }
         println!();
     }

@@ -71,6 +71,26 @@ impl Grid {
             Some(_) => self.points.borrow_mut()[x][y].fire(),
         }
     }
+
+    pub fn to_string(&self) -> String {
+        let mut result = String::with_capacity((self.size + 1) * self.size - 1);
+        for y in 0..self.size {
+            for x in 0..self.size {
+                if let Some(point) = self.at(x, y) {
+                    match (point.ship, point.hit) {
+                        (Some(_ship), false) => result.push('O'),
+                        (Some(_ship), true) => result.push('X'),
+                        (None, false) => result.push('.'),
+                        (None, true) => result.push('x'),
+                    }
+                }
+            }
+            if y < self.size - 1 {
+                result.push('\n');
+            }
+        }
+        result
+    }
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -117,26 +137,22 @@ mod tests {
 
     #[test]
     fn place_ship_horizontal() {
-        let grid = Grid::new(10);
+        let grid = Grid::new(3);
 
         grid.place_ship(Ship::Destroyer, (0, 0), Direction::Horizontal)
             .unwrap();
 
-        assert_eq!(grid.at(0, 0).unwrap().ship, Some(Ship::Destroyer));
-        assert_eq!(grid.at(1, 0).unwrap().ship, Some(Ship::Destroyer));
-        assert_eq!(grid.at(2, 0).unwrap().ship, None);
+        assert_eq!(grid.to_string(), ["OO.", "...", "..."].join("\n"));
     }
 
     #[test]
     fn place_ship_vertical() {
-        let grid = Grid::new(10);
+        let grid = Grid::new(3);
 
         grid.place_ship(Ship::Destroyer, (1, 1), Direction::Vertical)
             .unwrap();
 
-        assert_eq!(grid.at(1, 1).unwrap().ship, Some(Ship::Destroyer));
-        assert_eq!(grid.at(1, 2).unwrap().ship, Some(Ship::Destroyer));
-        assert_eq!(grid.at(1, 3).unwrap().ship, None);
+        assert_eq!(grid.to_string(), ["...", ".O.", ".O."].join("\n"));
     }
 
     #[test]
