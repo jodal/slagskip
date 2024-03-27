@@ -21,14 +21,11 @@ fn main() -> Result<()> {
 
         for opponent in turn.opponents.iter() {
             match opponent.fire_at_random() {
-                Some(((x, y), Some(ship))) => {
-                    println!(
-                        "{} fired at {},{} and hit {}!",
-                        turn.player.name, x, y, ship
-                    );
+                Some((point, Some(ship))) => {
+                    println!("{} fired at {} and hit {}!", turn.player.name, point, ship);
                 }
-                Some(((x, y), None)) => {
-                    println!("{} fired at {},{} and hit nothing.", turn.player.name, x, y);
+                Some((point, None)) => {
+                    println!("{} fired at {} and hit nothing.", turn.player.name, point);
                 }
                 None => {
                     println!("No more cells to hit!")

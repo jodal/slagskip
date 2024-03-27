@@ -2,7 +2,7 @@ use std::cell::RefCell;
 
 use eyre::{eyre, Result};
 
-use super::{Direction, Grid, Ship};
+use super::{Direction, Grid, Point, Ship};
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct Player {
@@ -79,16 +79,16 @@ impl Player {
         self.grid.at(x, y).and_then(|cell| cell.fire())
     }
 
-    pub fn fire_at_random(&self) -> Option<((usize, usize), Option<Ship>)> {
+    pub fn fire_at_random(&self) -> Option<(Point, Option<Ship>)> {
         let max_attempts = self.grid.size * self.grid.size;
         for _ in 0..max_attempts {
-            let ((x, y), cell) = self.grid.random_cell();
+            let (point, cell) = self.grid.random_cell();
             match cell.is_hit() {
                 true => {
                     // Select a new cell to hit
                 }
                 false => {
-                    return Some(((x, y), cell.fire()));
+                    return Some((point, cell.fire()));
                 }
             }
         }
