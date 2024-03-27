@@ -7,22 +7,22 @@ use super::{Direction, Ship};
 #[derive(Debug, Eq, PartialEq)]
 pub struct Grid {
     pub size: usize,
-    points: RefCell<Vec<Vec<Point>>>,
+    points: Vec<Vec<Point>>,
 }
 
 impl Grid {
     pub fn new(size: usize) -> Self {
         Grid {
             size,
-            points: RefCell::new(vec![vec![Point::new(); size]; size]),
+            points: vec![vec![Point::new(); size]; size],
         }
     }
 
-    pub(crate) fn at(&self, x: usize, y: usize) -> Option<Point> {
+    pub(crate) fn at(&self, x: usize, y: usize) -> Option<&Point> {
         if (x >= self.size) || (y >= self.size) {
             return None;
         }
-        Some(self.points.borrow()[x][y].clone())
+        Some(&self.points[x][y])
     }
 
     pub fn random_point(&self) -> (usize, usize) {
@@ -48,7 +48,7 @@ impl Grid {
             match self.at(pos_x, pos_y) {
                 None => return Err(eyre!("{} is out of bounds", ship)),
                 Some(square) => {
-                    if let Some(existing_ship) = square.ship {
+                    if let Some(existing_ship) = square.has_ship() {
                         return Err(eyre!("{} overlaps with {}", ship, existing_ship));
                     }
                 }
@@ -57,9 +57,7 @@ impl Grid {
 
         // Actually place the ship
         for i in 0..ship.length() {
-            let pos_x = x + i * step_x;
-            let pos_y = y + i * step_y;
-            self.points.borrow_mut()[pos_x][pos_y].place_ship(ship);
+            self.points[x + i * step_x][y + i * step_y].place_ship(ship);
         }
 
         Ok(())
@@ -68,7 +66,7 @@ impl Grid {
     pub fn fire_at(&self, x: usize, y: usize) -> Option<Ship> {
         match self.at(x, y) {
             None => None,
-            Some(_) => self.points.borrow_mut()[x][y].fire(),
+            Some(_) => self.points[x][y].fire(),
         }
     }
 
@@ -77,7 +75,7 @@ impl Grid {
         for y in 0..self.size {
             for x in 0..self.size {
                 if let Some(point) = self.at(x, y) {
-                    match (point.ship, point.hit) {
+                    match (point.has_ship(), point.is_hit()) {
                         (Some(_ship), false) => result.push('O'),
                         (Some(_ship), true) => result.push('X'),
                         (None, false) => result.push('.'),
@@ -95,28 +93,36 @@ impl Grid {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Point {
-    pub ship: Option<Ship>,
-    pub hit: bool,
+    ship: RefCell<Option<Ship>>,
+    hit: RefCell<bool>,
 }
 
 impl Point {
     fn new() -> Self {
         Point {
-            ship: None,
-            hit: false,
+            ship: RefCell::new(None),
+            hit: RefCell::new(false),
         }
     }
 
-    fn place_ship(&mut self, ship: Ship) {
-        self.ship = Some(ship);
+    pub fn has_ship(&self) -> Option<Ship> {
+        self.ship.borrow().clone()
     }
 
-    fn fire(&mut self) -> Option<Ship> {
-        if self.hit {
+    pub fn is_hit(&self) -> bool {
+        *self.hit.borrow()
+    }
+
+    fn place_ship(&self, ship: Ship) {
+        *self.ship.borrow_mut() = Some(ship);
+    }
+
+    fn fire(&self) -> Option<Ship> {
+        if self.is_hit() {
             return None;
         }
-        self.hit = true;
-        self.ship
+        *self.hit.borrow_mut() = true;
+        self.has_ship()
     }
 }
 
