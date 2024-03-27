@@ -26,7 +26,7 @@ fn main() -> Result<()> {
                 turn.player.name, opponent.name, x, y
             );
 
-            match opponent.grid.fire_at(x, y) {
+            match opponent.fire_at(x, y) {
                 Some(ship) => println!("{} hit {}!", turn.player.name, ship),
                 None => println!("{} missed!", turn.player.name),
             }

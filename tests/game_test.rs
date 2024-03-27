@@ -15,11 +15,8 @@ fn one_ship_game() -> Result<()> {
         assert_eq!(bob.status(), PlayerStatus::SETUP);
 
         // Place ships
-        alice
-            .grid
-            .place_ship(Ship::Destroyer, (0, 0), Direction::Horizontal)?;
-        bob.grid
-            .place_ship(Ship::Destroyer, (1, 0), Direction::Vertical)?;
+        alice.place_ship(Ship::Destroyer, (0, 0), Direction::Horizontal)?;
+        bob.place_ship(Ship::Destroyer, (1, 0), Direction::Vertical)?;
     }
 
     let game = new_game.start()?;
@@ -35,7 +32,7 @@ fn one_ship_game() -> Result<()> {
         for i in 0..2 {
             for turn in game.round() {
                 for opponent in turn.opponents.iter() {
-                    opponent.grid.fire_at(i, i);
+                    opponent.fire_at(i, i);
                 }
             }
         }
