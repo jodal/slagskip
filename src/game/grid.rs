@@ -7,7 +7,7 @@ use super::{Direction, Ship};
 #[derive(Debug, Eq, PartialEq)]
 pub struct Grid {
     pub size: usize,
-    pub points: RefCell<Vec<Vec<Point>>>,
+    points: RefCell<Vec<Vec<Point>>>,
 }
 
 impl Grid {
