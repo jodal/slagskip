@@ -18,7 +18,7 @@ impl Grid {
         }
     }
 
-    pub fn at(&self, x: usize, y: usize) -> Option<Point> {
+    pub(crate) fn at(&self, x: usize, y: usize) -> Option<Point> {
         if (x >= self.size) || (y >= self.size) {
             return None;
         }
