@@ -14,10 +14,7 @@ impl Game {
         Self {
             players: player_names
                 .iter()
-                .map(|name| Player {
-                    name: name.to_string(),
-                    grid: Grid::new(grid_size),
-                })
+                .map(|name| Player::new(name, grid_size))
                 .collect(),
         }
     }
@@ -25,9 +22,11 @@ impl Game {
     pub fn round(&self) -> Vec<Turn> {
         self.players
             .iter()
-            .map(|player| Turn {
-                player,
-                opponents: self.players.iter().filter(|&p| p != player).collect(),
+            .map(|player| {
+                Turn::new(
+                    player,
+                    self.players.iter().filter(|&p| p != player).collect(),
+                )
             })
             .collect()
     }
@@ -39,10 +38,25 @@ pub struct Player {
     pub grid: Grid,
 }
 
+impl Player {
+    pub fn new(name: &str, grid_size: usize) -> Self {
+        Self {
+            name: name.to_string(),
+            grid: Grid::new(grid_size),
+        }
+    }
+}
+
 #[derive(Debug, Eq, PartialEq)]
 pub struct Turn<'a> {
     pub player: &'a Player,
     pub opponents: Vec<&'a Player>,
+}
+
+impl<'a> Turn<'a> {
+    pub fn new(player: &'a Player, opponents: Vec<&'a Player>) -> Self {
+        Self { player, opponents }
+    }
 }
 
 #[cfg(test)]
