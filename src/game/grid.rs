@@ -136,6 +136,12 @@ mod tests {
     use super::*;
 
     #[test]
+    fn cells_iter() {
+        assert_eq!(Grid::new(3).cells().count(), 9);
+        assert_eq!(Grid::new(5).cells().count(), 25);
+    }
+
+    #[test]
     fn random_point() {
         let grid_size = 10;
         let grid = Grid::new(grid_size);
