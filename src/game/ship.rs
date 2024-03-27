@@ -1,8 +1,6 @@
-use std::fmt;
 use strum::IntoEnumIterator;
-use strum_macros::EnumIter;
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq, EnumIter)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, strum_macros::EnumIter, strum_macros::Display)]
 pub enum Ship {
     Carrier,
     Battleship,
@@ -24,12 +22,6 @@ impl Ship {
             Self::Submarine => 3,
             Self::Destroyer => 2,
         }
-    }
-}
-
-impl fmt::Display for Ship {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{:?}", self)
     }
 }
 
