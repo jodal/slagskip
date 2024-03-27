@@ -10,14 +10,14 @@ pub struct Grid {
 }
 
 impl Grid {
-    pub fn new(size: usize) -> Self {
+    pub(crate) fn new(size: usize) -> Self {
         Grid {
             size,
             cells: vec![vec![Cell::new(); size]; size],
         }
     }
 
-    pub fn cells(&self) -> CellIter {
+    pub(crate) fn cells(&self) -> CellIter {
         CellIter::new(&self.cells)
     }
 
@@ -57,7 +57,7 @@ impl Grid {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Cell {
+pub(crate) struct Cell {
     ship: RefCell<Option<Ship>>,
     hit: RefCell<bool>,
 }
@@ -70,19 +70,19 @@ impl Cell {
         }
     }
 
-    pub fn has_ship(&self) -> Option<Ship> {
+    pub(crate) fn has_ship(&self) -> Option<Ship> {
         self.ship.borrow().clone()
     }
 
-    pub fn is_hit(&self) -> bool {
+    pub(crate) fn is_hit(&self) -> bool {
         *self.hit.borrow()
     }
 
-    pub fn place_ship(&self, ship: Ship) {
+    pub(crate) fn place_ship(&self, ship: Ship) {
         *self.ship.borrow_mut() = Some(ship);
     }
 
-    pub fn fire(&self) -> Option<Ship> {
+    pub(crate) fn fire(&self) -> Option<Ship> {
         if self.is_hit() {
             return None;
         }
@@ -91,7 +91,7 @@ impl Cell {
     }
 }
 
-pub struct CellIter<'a> {
+pub(crate) struct CellIter<'a> {
     cells: &'a Vec<Vec<Cell>>,
     row_index: usize,
     column_index: usize,
