@@ -1,7 +1,9 @@
 mod grid;
+mod player;
 mod ship;
 
 pub use crate::game::grid::{Cell, Grid};
+pub use crate::game::player::{Player, PlayerStatus};
 pub use crate::game::ship::{Direction, Ship};
 
 #[derive(Debug)]
@@ -33,45 +35,6 @@ impl Game {
 }
 
 #[derive(Debug, Eq, PartialEq)]
-pub struct Player {
-    pub name: String,
-    pub grid: Grid,
-}
-
-impl Player {
-    pub fn new(name: &str, grid_size: usize) -> Self {
-        Self {
-            name: name.to_string(),
-            grid: Grid::new(grid_size),
-        }
-    }
-
-    pub fn status(&self) -> PlayerStatus {
-        if self.grid.to_place.borrow().len() != 0 {
-            return PlayerStatus::SETUP;
-        }
-
-        let num_alive = self
-            .grid
-            .cells()
-            .filter(|p| p.has_ship().is_some() && !p.is_hit())
-            .count();
-
-        if num_alive > 0 {
-            return PlayerStatus::PLAYING;
-        }
-        return PlayerStatus::DEAD;
-    }
-}
-
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum PlayerStatus {
-    SETUP,
-    PLAYING,
-    DEAD,
-}
-
-#[derive(Debug, Eq, PartialEq)]
 pub struct Turn<'a> {
     pub player: &'a Player,
     pub opponents: Vec<&'a Player>,
@@ -85,8 +48,6 @@ impl<'a> Turn<'a> {
 
 #[cfg(test)]
 mod tests {
-    use eyre::Result;
-
     use super::*;
 
     #[test]
@@ -119,51 +80,5 @@ mod tests {
         assert_eq!(*turns[2].player, game.players[2]);
         assert_eq!(*turns[2].opponents[0], game.players[0]);
         assert_eq!(*turns[2].opponents[1], game.players[1]);
-    }
-
-    #[test]
-    fn status_checks_if_any_ships_remain() -> Result<()> {
-        let player = Player::new("Alice", 3);
-        assert_eq!(player.status(), PlayerStatus::SETUP);
-
-        player
-            .grid
-            .place_ship(Ship::Submarine, (0, 0), Direction::Horizontal)?;
-
-        // There are more ships to place
-        assert_eq!(player.status(), PlayerStatus::SETUP);
-
-        player
-            .grid
-            .place_ship(Ship::Cruiser, (0, 1), Direction::Horizontal)?;
-        player
-            .grid
-            .place_ship(Ship::Destroyer, (0, 2), Direction::Horizontal)?;
-
-        // All ships have been placed
-        assert_eq!(player.status(), PlayerStatus::PLAYING);
-
-        // A miss
-        player.grid.fire_at(2, 2);
-        assert_eq!(player.status(), PlayerStatus::PLAYING);
-
-        // Sink Submarine
-        player.grid.fire_at(0, 0);
-        player.grid.fire_at(1, 0);
-        player.grid.fire_at(2, 0);
-        assert_eq!(player.status(), PlayerStatus::PLAYING);
-
-        // Sink Cruiser
-        player.grid.fire_at(0, 1);
-        player.grid.fire_at(1, 1);
-        player.grid.fire_at(2, 1);
-        assert_eq!(player.status(), PlayerStatus::PLAYING);
-
-        // Sink Destroyer
-        player.grid.fire_at(0, 2);
-        player.grid.fire_at(1, 2);
-        assert_eq!(player.status(), PlayerStatus::DEAD);
-
-        Ok(())
     }
 }
