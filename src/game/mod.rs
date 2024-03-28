@@ -2,7 +2,7 @@ mod grid;
 mod player;
 mod ship;
 
-use eyre::Result;
+use eyre::{eyre, Result};
 
 pub use crate::game::grid::{Grid, Point};
 pub use crate::game::player::{ActivePlayer, NewPlayer};
@@ -28,14 +28,20 @@ impl NewGame {
         self.players.last().unwrap()
     }
 
+    pub fn is_ready(&self) -> bool {
+        self.players.iter().filter(|np| np.is_ready()).count() >= 2
+    }
+
     pub fn start(self) -> Result<ActiveGame> {
+        if !self.is_ready() {
+            return Err(eyre!("Not enough players are ready to start."));
+        }
+
         let players = self
             .players
             .into_iter()
             .filter_map(|np| np.ready().ok())
             .collect();
-
-        // TODO Check that at least two players are ready to start
 
         Ok(ActiveGame { players })
     }
@@ -95,16 +101,24 @@ mod tests {
     use super::*;
 
     #[test]
-    fn game_setup() {
+    fn game_setup() -> Result<()> {
         let mut new_game = NewGame::new(10);
 
         let alice = new_game.add_player("Alice");
         assert_eq!(alice.name, "Alice");
         assert_eq!(alice.grid.size, 10);
+        alice.place_ships_randomly()?;
+        assert!(alice.is_ready());
+        assert!(!new_game.is_ready());
 
         let bob = new_game.add_player("Bob");
         assert_eq!(bob.name, "Bob");
         assert_eq!(bob.grid.size, 10);
+        bob.place_ships_randomly()?;
+        assert!(bob.is_ready());
+        assert!(new_game.is_ready());
+
+        Ok(())
     }
 
     #[test]
