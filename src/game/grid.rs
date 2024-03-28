@@ -34,25 +34,27 @@ impl Grid {
         let y = rng.gen_range(0..self.size);
         (Point::new(x, y), self.at(x, y).unwrap())
     }
+}
 
-    pub fn to_string(&self) -> String {
-        let mut result = String::with_capacity((self.size + 1) * self.size - 1);
+impl fmt::Display for Grid {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let mut buf = String::with_capacity((self.size + 1) * self.size - 1);
         for y in 0..self.size {
             for x in 0..self.size {
                 if let Some(cell) = self.at(x, y) {
                     match (cell.has_ship(), cell.is_hit()) {
-                        (Some(_ship), false) => result.push('O'),
-                        (Some(_ship), true) => result.push('X'),
-                        (None, false) => result.push('.'),
-                        (None, true) => result.push('x'),
+                        (Some(_ship), false) => buf.push('O'),
+                        (Some(_ship), true) => buf.push('X'),
+                        (None, false) => buf.push('.'),
+                        (None, true) => buf.push('x'),
                     }
                 }
             }
             if y < self.size - 1 {
-                result.push('\n');
+                buf.push('\n');
             }
         }
-        result
+        write!(f, "{}", buf)
     }
 }
 
@@ -71,7 +73,7 @@ impl Cell {
     }
 
     pub(crate) fn has_ship(&self) -> Option<Ship> {
-        self.ship.borrow().clone()
+        self.ship.borrow().to_owned()
     }
 
     pub(crate) fn is_hit(&self) -> bool {

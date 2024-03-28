@@ -57,9 +57,9 @@ impl NewPlayer {
 
         // Actually place the ship
         for i in 0..ship.length() {
-            self.grid
-                .at(x + i * step_x, y + i * step_y)
-                .and_then(|cell| Some(cell.place_ship(ship)));
+            if let Some(cell) = self.grid.at(x + i * step_x, y + i * step_y) {
+                cell.place_ship(ship);
+            }
         }
 
         Ok(())
