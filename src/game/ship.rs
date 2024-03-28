@@ -1,3 +1,4 @@
+use rand::{thread_rng, Rng};
 use strum::IntoEnumIterator;
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq, strum_macros::EnumIter, strum_macros::Display)]
@@ -32,6 +33,14 @@ pub enum Direction {
 }
 
 impl Direction {
+    pub fn random() -> Self {
+        let mut rng = thread_rng();
+        match rng.gen_bool(0.5) {
+            true => Direction::Horizontal,
+            false => Direction::Vertical,
+        }
+    }
+
     pub(crate) fn step(&self) -> (usize, usize) {
         match self {
             Self::Horizontal => (1, 0),
