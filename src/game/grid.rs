@@ -85,6 +85,7 @@ impl Cell {
     }
 
     pub(crate) fn fire(&self) -> Option<Ship> {
+        // TODO Return Fire enum: Miss, Hit, Sunk(ship)
         if self.is_hit() {
             return None;
         }

@@ -35,7 +35,7 @@ impl NewGame {
             .filter_map(|np| np.ready().ok())
             .collect();
 
-        // TODO: Check that at least two players are ready to start
+        // TODO Check that at least two players are ready to start
 
         Ok(ActiveGame { players })
     }
@@ -52,7 +52,7 @@ impl ActiveGame {
     }
 
     pub fn winner(&self) -> Option<&ActivePlayer> {
-        // TODO: Handle tie, where all remaining players die in the same round
+        // TODO Handle tie, where all remaining players die in the same round
         match self.alive_players()[..] {
             [player] => Some(player),
             _ => None,
