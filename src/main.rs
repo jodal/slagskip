@@ -18,28 +18,35 @@ fn main() -> Result<()> {
 
     let game = new_game.start()?;
 
-    for turn in game.round() {
-        for opponent in turn.opponents.iter() {
-            match opponent.fire_at_random() {
-                Some((point, Some(ship))) => {
-                    println!(
-                        "{} fired at {} {} and hit {}!",
-                        turn.player.name, opponent.name, point, ship
-                    );
-                }
-                Some((point, None)) => {
-                    println!(
-                        "{} fired at {} {} and hit nothing.",
-                        turn.player.name, opponent.name, point
-                    );
-                }
-                None => {
-                    println!("No more cells to hit!")
+    while game.winner().is_none() {
+        for turn in game.round() {
+            for opponent in turn.opponents.iter() {
+                match opponent.fire_at_random() {
+                    Some((point, Some(ship))) => {
+                        println!(
+                            "{} fired at {} {} and hit {}!",
+                            turn.player.name, opponent.name, point, ship
+                        );
+                    }
+                    Some((point, None)) => {
+                        println!(
+                            "{} fired at {} {} and missed.",
+                            turn.player.name, opponent.name, point
+                        );
+                    }
+                    None => {
+                        println!("No more cells to hit!")
+                    }
                 }
             }
         }
+        println!();
     }
-    println!();
+
+    if let Some(winner) = game.winner() {
+        println!("{} won!", winner.name);
+        println!();
+    }
 
     for player in game.players.iter() {
         println!(">>> {}", player.name);
