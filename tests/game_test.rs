@@ -1,5 +1,5 @@
 use eyre::Result;
-use slagskip::game::{Direction, GameResult, NewGame, Ship};
+use slagskip::game::{Direction, GameResult, NewGame, Point, Ship};
 
 #[test]
 fn one_ship_game() -> Result<()> {
@@ -12,8 +12,8 @@ fn one_ship_game() -> Result<()> {
         let bob = &new_game.players[1];
 
         // Place ships
-        alice.place_ship(Ship::Destroyer, (0, 0), Direction::Horizontal)?;
-        bob.place_ship(Ship::Destroyer, (1, 0), Direction::Vertical)?;
+        alice.place_ship(Ship::Destroyer, Point(0, 0), Direction::Horizontal)?;
+        bob.place_ship(Ship::Destroyer, Point(1, 0), Direction::Vertical)?;
     }
 
     let game = new_game.start()?;
@@ -29,7 +29,7 @@ fn one_ship_game() -> Result<()> {
         for i in 0..2 {
             for turn in game.round() {
                 for opponent in turn.opponents.iter() {
-                    opponent.fire_at(0, i);
+                    opponent.fire_at(Point(0, i));
                 }
             }
         }
@@ -43,7 +43,7 @@ fn one_ship_game() -> Result<()> {
         // Let everyone have another turn
         for turn in game.round() {
             for opponent in turn.opponents.iter() {
-                opponent.fire_at(1, 0);
+                opponent.fire_at(Point(1, 0));
             }
         }
 

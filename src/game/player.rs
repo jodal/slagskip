@@ -20,12 +20,7 @@ impl NewPlayer {
         }
     }
 
-    pub fn place_ship(
-        &self,
-        ship: Ship,
-        (x, y): (usize, usize),
-        direction: Direction,
-    ) -> Result<()> {
+    pub fn place_ship(&self, ship: Ship, point: Point, direction: Direction) -> Result<()> {
         // Remove ship from self.to_place
         let mut to_place = self.to_place.borrow_mut();
         if let Some(index) = to_place.iter().position(|s| *s == ship) {
@@ -42,10 +37,8 @@ impl NewPlayer {
 
         // Validate the placement
         for i in 0..ship.length() {
-            let pos_x = x + i * step_x;
-            let pos_y = y + i * step_y;
-
-            match self.grid.at(pos_x, pos_y) {
+            let point_i = Point(point.0 + i * step_x, point.1 + i * step_y);
+            match self.grid.at(point_i) {
                 None => return Err(eyre!("{} is out of bounds", ship)),
                 Some(cell) => {
                     if let Some(existing_ship) = cell.has_ship() {
@@ -57,7 +50,10 @@ impl NewPlayer {
 
         // Actually place the ship
         for i in 0..ship.length() {
-            if let Some(cell) = self.grid.at(x + i * step_x, y + i * step_y) {
+            if let Some(cell) = self
+                .grid
+                .at(Point(point.0 + i * step_x, point.1 + i * step_y))
+            {
                 cell.place_ship(ship);
             }
         }
@@ -67,11 +63,11 @@ impl NewPlayer {
 
     pub fn place_ships_randomly(&self) -> Result<()> {
         // TODO Random placement ot make this more interesting
-        self.place_ship(Ship::Carrier, (1, 1), Direction::Horizontal)?;
-        self.place_ship(Ship::Battleship, (8, 2), Direction::Vertical)?;
-        self.place_ship(Ship::Cruiser, (3, 7), Direction::Vertical)?;
-        self.place_ship(Ship::Submarine, (0, 4), Direction::Horizontal)?;
-        self.place_ship(Ship::Destroyer, (5, 6), Direction::Horizontal)?;
+        self.place_ship(Ship::Carrier, Point(1, 1), Direction::Horizontal)?;
+        self.place_ship(Ship::Battleship, Point(8, 2), Direction::Vertical)?;
+        self.place_ship(Ship::Cruiser, Point(3, 7), Direction::Vertical)?;
+        self.place_ship(Ship::Submarine, Point(0, 4), Direction::Horizontal)?;
+        self.place_ship(Ship::Destroyer, Point(5, 6), Direction::Horizontal)?;
         Ok(())
     }
 
@@ -102,8 +98,8 @@ pub struct ActivePlayer {
 }
 
 impl ActivePlayer {
-    pub fn fire_at(&self, x: usize, y: usize) -> Option<Fire> {
-        self.grid.at(x, y).and_then(|cell| Some(cell.fire()))
+    pub fn fire_at(&self, point: Point) -> Option<Fire> {
+        self.grid.at(point).and_then(|cell| Some(cell.fire()))
     }
 
     pub fn fire_at_random(&self) -> Option<(Point, Fire)> {
@@ -144,7 +140,7 @@ mod tests {
     fn place_ship_horizontal() -> Result<()> {
         let player = NewPlayer::new("Alice", 3);
 
-        player.place_ship(Ship::Destroyer, (0, 0), Direction::Horizontal)?;
+        player.place_ship(Ship::Destroyer, Point(0, 0), Direction::Horizontal)?;
 
         assert_eq!(player.grid.to_string(), ["OO.", "...", "..."].join("\n"));
         Ok(())
@@ -154,7 +150,7 @@ mod tests {
     fn place_ship_vertical() -> Result<()> {
         let player = NewPlayer::new("Alice", 3);
 
-        player.place_ship(Ship::Destroyer, (1, 1), Direction::Vertical)?;
+        player.place_ship(Ship::Destroyer, Point(1, 1), Direction::Vertical)?;
 
         assert_eq!(player.grid.to_string(), ["...", ".O.", ".O."].join("\n"));
         Ok(())
@@ -165,7 +161,7 @@ mod tests {
         let player = NewPlayer::new("Alice", 10);
 
         // When a destroyer of length two is placed on the last cell on a row
-        let result = player.place_ship(Ship::Destroyer, (9, 0), Direction::Horizontal);
+        let result = player.place_ship(Ship::Destroyer, Point(9, 0), Direction::Horizontal);
 
         assert!(result.is_err());
         Ok(())
@@ -175,10 +171,10 @@ mod tests {
     fn place_ship_overlapping_existing_ship() -> Result<()> {
         let player = NewPlayer::new("Alice", 10);
         // Given a carrier in the first five cells: CCCCC.....
-        player.place_ship(Ship::Carrier, (0, 0), Direction::Horizontal)?;
+        player.place_ship(Ship::Carrier, Point(0, 0), Direction::Horizontal)?;
 
         // When a destroyer is placed overlapping the carrier: CCCCDD....
-        let result = player.place_ship(Ship::Destroyer, (4, 0), Direction::Horizontal);
+        let result = player.place_ship(Ship::Destroyer, Point(4, 0), Direction::Horizontal);
 
         assert!(result.is_err());
         Ok(())
@@ -187,9 +183,9 @@ mod tests {
     #[test]
     fn place_same_ship_twice() -> Result<()> {
         let player = NewPlayer::new("Alice", 10);
-        player.place_ship(Ship::Destroyer, (0, 0), Direction::Horizontal)?;
+        player.place_ship(Ship::Destroyer, Point(0, 0), Direction::Horizontal)?;
 
-        let result = player.place_ship(Ship::Destroyer, (0, 1), Direction::Horizontal);
+        let result = player.place_ship(Ship::Destroyer, Point(0, 1), Direction::Horizontal);
 
         assert!(result.is_err());
         Ok(())
@@ -199,53 +195,53 @@ mod tests {
     fn fire_at() -> Result<()> {
         // Given a carrier: CCCCC.....
         let new_player = NewPlayer::new("Alice", 2);
-        new_player.place_ship(Ship::Destroyer, (0, 0), Direction::Horizontal)?;
+        new_player.place_ship(Ship::Destroyer, Point(0, 0), Direction::Horizontal)?;
         let player = new_player.ready()?;
 
         // CCx is a miss
-        assert_eq!(player.fire_at(2, 0), Some(Fire::Miss));
+        assert_eq!(player.fire_at(Point(2, 0)), Some(Fire::Miss));
 
         // XCx is a hit
-        assert_eq!(player.fire_at(0, 0), Some(Fire::Hit));
+        assert_eq!(player.fire_at(Point(0, 0)), Some(Fire::Hit));
 
         // Another hit in the same spot is a miss as there is no longer anything there
-        assert_eq!(player.fire_at(0, 0), Some(Fire::Miss));
+        assert_eq!(player.fire_at(Point(0, 0)), Some(Fire::Miss));
         Ok(())
     }
 
     #[test]
     fn status_checks_if_any_ships_remain() -> Result<()> {
         let new_player = NewPlayer::new("Alice", 3);
-        new_player.place_ship(Ship::Submarine, (0, 0), Direction::Horizontal)?;
+        new_player.place_ship(Ship::Submarine, Point(0, 0), Direction::Horizontal)?;
 
         // There are more ships to place
         assert!(!new_player.is_ready());
 
-        new_player.place_ship(Ship::Cruiser, (0, 1), Direction::Horizontal)?;
-        new_player.place_ship(Ship::Destroyer, (0, 2), Direction::Horizontal)?;
+        new_player.place_ship(Ship::Cruiser, Point(0, 1), Direction::Horizontal)?;
+        new_player.place_ship(Ship::Destroyer, Point(0, 2), Direction::Horizontal)?;
 
         // All ships have been placed
         let player = new_player.ready()?;
 
         // A miss
-        player.fire_at(2, 2);
+        player.fire_at(Point(2, 2));
         assert!(player.is_alive());
 
         // Sink Submarine
-        player.fire_at(0, 0);
-        player.fire_at(1, 0);
-        player.fire_at(2, 0);
+        player.fire_at(Point(0, 0));
+        player.fire_at(Point(1, 0));
+        player.fire_at(Point(2, 0));
         assert!(player.is_alive());
 
         // Sink Cruiser
-        player.fire_at(0, 1);
-        player.fire_at(1, 1);
-        player.fire_at(2, 1);
+        player.fire_at(Point(0, 1));
+        player.fire_at(Point(1, 1));
+        player.fire_at(Point(2, 1));
         assert!(player.is_alive());
 
         // Sink Destroyer
-        player.fire_at(0, 2);
-        player.fire_at(1, 2);
+        player.fire_at(Point(0, 2));
+        player.fire_at(Point(1, 2));
         assert!(!player.is_alive());
 
         Ok(())

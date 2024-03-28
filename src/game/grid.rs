@@ -21,18 +21,17 @@ impl Grid {
         CellIter::new(&self.cells)
     }
 
-    pub(crate) fn at(&self, x: usize, y: usize) -> Option<&Cell> {
-        if (x >= self.size) || (y >= self.size) {
+    pub(crate) fn at(&self, point: Point) -> Option<&Cell> {
+        if (point.0 >= self.size) || (point.1 >= self.size) {
             return None;
         }
-        Some(&self.cells[x][y])
+        Some(&self.cells[point.0][point.1])
     }
 
     pub(crate) fn random_cell(&self) -> (Point, &Cell) {
         let mut rng = thread_rng();
-        let x = rng.gen_range(0..self.size);
-        let y = rng.gen_range(0..self.size);
-        (Point::new(x, y), self.at(x, y).unwrap())
+        let point = Point(rng.gen_range(0..self.size), rng.gen_range(0..self.size));
+        (point, self.at(point).unwrap())
     }
 }
 
@@ -41,7 +40,7 @@ impl fmt::Display for Grid {
         let mut buf = String::with_capacity((self.size + 1) * self.size - 1);
         for y in 0..self.size {
             for x in 0..self.size {
-                if let Some(cell) = self.at(x, y) {
+                if let Some(cell) = self.at(Point(x, y)) {
                     match (cell.has_ship(), cell.is_hit()) {
                         (Some(_ship), false) => buf.push('O'),
                         (Some(_ship), true) => buf.push('X'),
@@ -141,21 +140,12 @@ impl<'a> Iterator for CellIter<'a> {
     }
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Point {
-    x: usize,
-    y: usize,
-}
-
-impl Point {
-    pub fn new(x: usize, y: usize) -> Self {
-        Self { x, y }
-    }
-}
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+pub struct Point(pub usize, pub usize);
 
 impl fmt::Display for Point {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}{}", (65u8 + self.x as u8) as char, self.y + 1)
+        write!(f, "{}{}", (65u8 + self.0 as u8) as char, self.1 + 1)
     }
 }
 
@@ -183,16 +173,16 @@ mod tests {
 
         let (point, cell) = grid.random_cell();
 
-        assert!(point.x < grid_size);
-        assert!(point.y < grid_size);
-        assert_eq!(grid.at(point.x, point.y).unwrap(), cell);
+        assert!(point.0 < grid_size);
+        assert!(point.1 < grid_size);
+        assert_eq!(grid.at(point).unwrap(), cell);
     }
 
     #[test]
     fn point_format() {
-        assert_eq!(Point::new(0, 0).to_string(), "A1");
-        assert_eq!(Point::new(0, 1).to_string(), "A2");
-        assert_eq!(Point::new(1, 0).to_string(), "B1");
-        assert_eq!(Point::new(2, 4).to_string(), "C5");
+        assert_eq!(Point(0, 0).to_string(), "A1");
+        assert_eq!(Point(0, 1).to_string(), "A2");
+        assert_eq!(Point(1, 0).to_string(), "B1");
+        assert_eq!(Point(2, 4).to_string(), "C5");
     }
 }
