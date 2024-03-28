@@ -29,18 +29,29 @@ fn one_ship_game() -> Result<()> {
         for i in 0..2 {
             for turn in game.round() {
                 for opponent in turn.opponents.iter() {
-                    opponent.fire_at(i, i);
+                    opponent.fire_at(0, i);
                 }
             }
         }
 
-        assert_eq!(alice.grid.to_string(), ["XO", "._"].join("\n"));
-        assert_eq!(bob.grid.to_string(), ["_O", ".X"].join("\n"));
-
+        assert_eq!(alice.grid.to_string(), ["XO", "_."].join("\n"));
+        assert_eq!(bob.grid.to_string(), ["_O", "_O"].join("\n"));
         assert!(alice.is_alive());
         assert!(bob.is_alive());
-
         assert!(game.winner().is_none());
+
+        // Let everyone have another turn
+        for turn in game.round() {
+            for opponent in turn.opponents.iter() {
+                opponent.fire_at(1, 0);
+            }
+        }
+
+        assert_eq!(alice.grid.to_string(), ["XX", "_."].join("\n"));
+        assert_eq!(bob.grid.to_string(), ["_X", "_O"].join("\n"));
+        assert!(!alice.is_alive());
+        assert!(bob.is_alive());
+        assert_eq!(game.winner().unwrap().name, "Bob");
     }
 
     Ok(())
