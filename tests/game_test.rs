@@ -34,8 +34,8 @@ fn one_ship_game() -> Result<()> {
             }
         }
 
-        assert_eq!(alice.grid.to_string(), ["XO", ".x"].join("\n"));
-        assert_eq!(bob.grid.to_string(), ["xO", ".X"].join("\n"));
+        assert_eq!(alice.grid.to_string(), ["XO", "._"].join("\n"));
+        assert_eq!(bob.grid.to_string(), ["_O", ".X"].join("\n"));
 
         assert!(alice.is_alive());
         assert!(bob.is_alive());

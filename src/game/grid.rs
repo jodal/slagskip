@@ -46,7 +46,7 @@ impl fmt::Display for Grid {
                         (Some(_ship), false) => buf.push('O'),
                         (Some(_ship), true) => buf.push('X'),
                         (None, false) => buf.push('.'),
-                        (None, true) => buf.push('x'),
+                        (None, true) => buf.push('_'),
                     }
                 }
             }
