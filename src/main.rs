@@ -6,8 +6,10 @@ fn main() -> Result<()> {
     new_game.add_player("Alice");
     new_game.add_player("Bob");
 
+    println!("Placing ships...");
+    println!();
     for player in new_game.players.iter() {
-        println!("{}: Place your ships", player.name);
+        println!(">>> {}", player.name);
         player.place_ships_randomly()?;
         println!();
         print_grid(&player.grid);
@@ -17,15 +19,19 @@ fn main() -> Result<()> {
     let game = new_game.start()?;
 
     for turn in game.round() {
-        println!("{}: Fire!", turn.player.name);
-
         for opponent in turn.opponents.iter() {
             match opponent.fire_at_random() {
                 Some((point, Some(ship))) => {
-                    println!("{} fired at {} and hit {}!", turn.player.name, point, ship);
+                    println!(
+                        "{} fired at {} {} and hit {}!",
+                        turn.player.name, opponent.name, point, ship
+                    );
                 }
                 Some((point, None)) => {
-                    println!("{} fired at {} and hit nothing.", turn.player.name, point);
+                    println!(
+                        "{} fired at {} {} and hit nothing.",
+                        turn.player.name, opponent.name, point
+                    );
                 }
                 None => {
                     println!("No more cells to hit!")
@@ -33,9 +39,10 @@ fn main() -> Result<()> {
             }
         }
     }
+    println!();
 
     for player in game.players.iter() {
-        println!("Grid of {}", player.name);
+        println!(">>> {}", player.name);
         println!();
         print_grid(&player.grid);
         println!();
