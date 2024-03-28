@@ -20,22 +20,40 @@ impl NewPlayer {
         }
     }
 
-    pub fn place_ship(&self, ship: Ship, point: Point, direction: Direction) -> Result<()> {
-        // Remove ship from self.to_place
-        let mut to_place = self.to_place.borrow_mut();
-        if let Some(index) = to_place.iter().position(|s| *s == ship) {
-            to_place.remove(index);
-        } else {
-            return Err(eyre!(
-                "Tried placing {}; expected one of {:?}.",
-                ship,
-                to_place
-            ));
+    pub fn get_ship_to_place(&self) -> Option<Ship> {
+        match self.to_place.borrow().first() {
+            Some(ship) => Some(ship.clone()),
+            None => None,
         }
+    }
 
+    fn get_place_ship_index(&self, ship: Ship) -> Result<usize> {
+        self.to_place
+            .borrow()
+            .iter()
+            .position(|s| *s == ship)
+            .ok_or_else(|| {
+                eyre!(
+                    "{} is not to be placed. Expected one of {:?}",
+                    ship,
+                    self.to_place.borrow()
+                )
+            })
+    }
+
+    fn remove_ship_to_place(&self, ship: Ship) -> Result<()> {
+        let index = self.get_place_ship_index(ship)?;
+        self.to_place.borrow_mut().remove(index);
+        Ok(())
+    }
+
+    pub fn place_ship(&self, ship: Ship, point: Point, direction: Direction) -> Result<()> {
         let (step_x, step_y) = direction.step();
 
-        // Validate the placement
+        // Check that ship is to be placed
+        self.get_place_ship_index(ship)?;
+
+        // Check the placement
         for i in 0..ship.length() {
             let point_i = Point(point.0 + i * step_x, point.1 + i * step_y);
             match self.grid.at(point_i) {
@@ -57,6 +75,7 @@ impl NewPlayer {
                 cell.place_ship(ship);
             }
         }
+        self.remove_ship_to_place(ship)?;
 
         Ok(())
     }
