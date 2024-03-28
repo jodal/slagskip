@@ -81,12 +81,19 @@ impl NewPlayer {
     }
 
     pub fn place_ships_randomly(&self) -> Result<()> {
-        // TODO Random placement ot make this more interesting
-        self.place_ship(Ship::Carrier, Point(1, 1), Direction::Horizontal)?;
-        self.place_ship(Ship::Battleship, Point(8, 2), Direction::Vertical)?;
-        self.place_ship(Ship::Cruiser, Point(3, 7), Direction::Vertical)?;
-        self.place_ship(Ship::Submarine, Point(0, 4), Direction::Horizontal)?;
-        self.place_ship(Ship::Destroyer, Point(5, 6), Direction::Horizontal)?;
+        while let Some(ship) = self.get_ship_to_place() {
+            loop {
+                let point = self.grid.random_point();
+                match self.place_ship(ship, point, Direction::random()) {
+                    Ok(_) => {
+                        break;
+                    }
+                    Err(_) => {
+                        // Try again
+                    }
+                }
+            }
+        }
         Ok(())
     }
 
