@@ -39,6 +39,8 @@ fn one_ship_game() -> Result<()> {
 
         assert!(alice.is_alive());
         assert!(bob.is_alive());
+
+        assert!(game.winner().is_none());
     }
 
     Ok(())

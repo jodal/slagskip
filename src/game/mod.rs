@@ -47,13 +47,28 @@ pub struct ActiveGame {
 }
 
 impl ActiveGame {
+    fn alive_players(&self) -> Vec<&ActivePlayer> {
+        self.players.iter().filter(|p| p.is_alive()).collect()
+    }
+
+    pub fn winner(&self) -> Option<&ActivePlayer> {
+        // TODO: Handle tie, where all remaining players die in the same round
+        match self.alive_players()[..] {
+            [player] => Some(player),
+            _ => None,
+        }
+    }
+
     pub fn round(&self) -> Vec<Turn> {
         self.players
             .iter()
             .map(|player| {
                 Turn::new(
                     player,
-                    self.players.iter().filter(|&p| p != player).collect(),
+                    self.alive_players()
+                        .into_iter()
+                        .filter(|p| *p != player)
+                        .collect(),
                 )
             })
             .collect()

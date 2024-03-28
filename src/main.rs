@@ -9,8 +9,8 @@ fn main() -> Result<()> {
     println!("Placing ships...");
     println!();
     for player in new_game.players.iter() {
-        println!(">>> {}", player.name);
         player.place_ships_randomly()?;
+        println!(">>> {}", player.name);
         println!();
         print_grid(&player.grid);
         println!();
