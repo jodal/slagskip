@@ -52,9 +52,10 @@ impl ActiveGame {
     }
 
     pub fn winner(&self) -> Option<&ActivePlayer> {
-        // TODO Handle tie, where all remaining players die in the same round
+        // TODO Handle tie gracefully, return GameResult enum with Winner(player), Tie, None
         match self.alive_players()[..] {
             [player] => Some(player),
+            [] => panic!("All remaining players died in the same round."),
             _ => None,
         }
     }
