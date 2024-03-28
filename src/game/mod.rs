@@ -4,7 +4,7 @@ mod ship;
 
 use eyre::{eyre, Result};
 
-pub use crate::game::grid::{Grid, Point};
+pub use crate::game::grid::{Fire, Grid, Point};
 pub use crate::game::player::{ActivePlayer, NewPlayer};
 pub use crate::game::ship::{Direction, Ship};
 

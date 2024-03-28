@@ -2,7 +2,7 @@ use std::cell::RefCell;
 
 use eyre::{eyre, Result};
 
-use super::{Direction, Grid, Point, Ship};
+use super::{grid::Fire, Direction, Grid, Point, Ship};
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct NewPlayer {
@@ -102,11 +102,11 @@ pub struct ActivePlayer {
 }
 
 impl ActivePlayer {
-    pub fn fire_at(&self, x: usize, y: usize) -> Option<Ship> {
-        self.grid.at(x, y).and_then(|cell| cell.fire())
+    pub fn fire_at(&self, x: usize, y: usize) -> Option<Fire> {
+        self.grid.at(x, y).and_then(|cell| Some(cell.fire()))
     }
 
-    pub fn fire_at_random(&self) -> Option<(Point, Option<Ship>)> {
+    pub fn fire_at_random(&self) -> Option<(Point, Fire)> {
         let max_attempts = self.grid.size * self.grid.size;
         for _ in 0..max_attempts {
             let (point, cell) = self.grid.random_cell();
@@ -203,13 +203,13 @@ mod tests {
         let player = new_player.ready()?;
 
         // CCx is a miss
-        assert_eq!(player.fire_at(2, 0), None);
+        assert_eq!(player.fire_at(2, 0), Some(Fire::Miss));
 
         // XCx is a hit
-        assert_eq!(player.fire_at(0, 0), Some(Ship::Destroyer));
+        assert_eq!(player.fire_at(0, 0), Some(Fire::Hit));
 
         // Another hit in the same spot is a miss as there is no longer anything there
-        assert_eq!(player.fire_at(0, 0), None);
+        assert_eq!(player.fire_at(0, 0), Some(Fire::Miss));
         Ok(())
     }
 

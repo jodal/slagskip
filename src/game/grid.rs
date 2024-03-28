@@ -84,13 +84,20 @@ impl Cell {
         *self.ship.borrow_mut() = Some(ship);
     }
 
-    pub(crate) fn fire(&self) -> Option<Ship> {
-        // TODO Return Fire enum: Miss, Hit, Sunk(ship)
+    pub(crate) fn fire(&self) -> Fire {
         if self.is_hit() {
-            return None;
+            return Fire::Miss;
         }
         *self.hit.borrow_mut() = true;
-        self.has_ship()
+        match self.has_ship() {
+            Some(_ship) => {
+                // TODO Detect if entire ship is hit, and if so return Sunk(ship)
+                return Fire::Hit;
+            }
+            None => {
+                return Fire::Miss;
+            }
+        }
     }
 }
 
@@ -150,6 +157,13 @@ impl fmt::Display for Point {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}{}", (65u8 + self.x as u8) as char, self.y + 1)
     }
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Fire {
+    Miss,
+    Hit,
+    Sunk(Ship),
 }
 
 #[cfg(test)]

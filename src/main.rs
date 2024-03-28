@@ -1,7 +1,7 @@
 use eyre::Result;
 use slagskip::{
     cli::print_grid,
-    game::{GameResult, NewGame},
+    game::{Fire, GameResult, NewGame},
 };
 
 fn main() -> Result<()> {
@@ -25,16 +25,22 @@ fn main() -> Result<()> {
         for turn in game.round() {
             for opponent in turn.opponents.iter() {
                 match opponent.fire_at_random() {
-                    Some((point, Some(ship))) => {
-                        println!(
-                            "{} fired at {} {} and hit {}!",
-                            turn.player.name, opponent.name, point, ship
-                        );
-                    }
-                    Some((point, None)) => {
+                    Some((point, Fire::Miss)) => {
                         println!(
                             "{} fired at {} {} and missed.",
                             turn.player.name, opponent.name, point
+                        );
+                    }
+                    Some((point, Fire::Hit)) => {
+                        println!(
+                            "{} fired at {} {} and hit!",
+                            turn.player.name, opponent.name, point
+                        );
+                    }
+                    Some((point, Fire::Sunk(ship))) => {
+                        println!(
+                            "{} fired at {} {} and sunk a {}!",
+                            turn.player.name, opponent.name, point, ship
                         );
                     }
                     None => {
