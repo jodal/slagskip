@@ -28,9 +28,13 @@ impl Grid {
         Some(&self.cells[point.0][point.1])
     }
 
-    pub(crate) fn random_cell(&self) -> (Point, &Cell) {
+    pub(crate) fn random_point(&self) -> Point {
         let mut rng = thread_rng();
-        let point = Point(rng.gen_range(0..self.size), rng.gen_range(0..self.size));
+        Point(rng.gen_range(0..self.size), rng.gen_range(0..self.size))
+    }
+
+    pub(crate) fn random_cell(&self) -> (Point, &Cell) {
+        let point = self.random_point();
         (point, self.at(point).unwrap())
     }
 }
