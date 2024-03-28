@@ -1,5 +1,5 @@
 use eyre::Result;
-use slagskip::game::{Direction, NewGame, Ship};
+use slagskip::game::{Direction, GameResult, NewGame, Ship};
 
 #[test]
 fn one_ship_game() -> Result<()> {
@@ -38,7 +38,7 @@ fn one_ship_game() -> Result<()> {
         assert_eq!(bob.grid.to_string(), ["_O", "_O"].join("\n"));
         assert!(alice.is_alive());
         assert!(bob.is_alive());
-        assert!(game.winner().is_none());
+        assert!(game.result().is_none());
 
         // Let everyone have another turn
         for turn in game.round() {
@@ -51,7 +51,14 @@ fn one_ship_game() -> Result<()> {
         assert_eq!(bob.grid.to_string(), ["_X", "_O"].join("\n"));
         assert!(!alice.is_alive());
         assert!(bob.is_alive());
-        assert_eq!(game.winner().unwrap().name, "Bob");
+        match game.result().unwrap() {
+            GameResult::Winner(winner) => {
+                assert_eq!(winner.name, "Bob");
+            }
+            GameResult::Tie => {
+                panic!("Game should end with a winner, but ended in a tie.")
+            }
+        }
     }
 
     Ok(())

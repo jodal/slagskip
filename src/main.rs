@@ -1,5 +1,8 @@
 use eyre::Result;
-use slagskip::{cli::print_grid, game::NewGame};
+use slagskip::{
+    cli::print_grid,
+    game::{GameResult, NewGame},
+};
 
 fn main() -> Result<()> {
     let mut new_game = NewGame::new(10);
@@ -18,7 +21,7 @@ fn main() -> Result<()> {
 
     let game = new_game.start()?;
 
-    while game.winner().is_none() {
+    while game.result().is_none() {
         for turn in game.round() {
             for opponent in turn.opponents.iter() {
                 match opponent.fire_at_random() {
@@ -43,9 +46,16 @@ fn main() -> Result<()> {
         println!();
     }
 
-    if let Some(winner) = game.winner() {
-        println!("{} won!", winner.name);
-        println!();
+    match game.result() {
+        Some(GameResult::Winner(winner)) => {
+            println!("{} won!", winner.name);
+            println!();
+        }
+        Some(GameResult::Tie) => {
+            println!("Game ended in a tie!");
+            println!();
+        }
+        None => {}
     }
 
     for player in game.players.iter() {

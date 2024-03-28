@@ -57,11 +57,10 @@ impl ActiveGame {
         self.players.iter().filter(|p| p.is_alive()).collect()
     }
 
-    pub fn winner(&self) -> Option<&ActivePlayer> {
-        // TODO Handle tie gracefully, return GameResult enum with Winner(player), Tie, None
+    pub fn result(&self) -> Option<GameResult> {
         match self.alive_players()[..] {
-            [player] => Some(player),
-            [] => panic!("All remaining players died in the same round."),
+            [player] => Some(GameResult::Winner(player)),
+            [] => Some(GameResult::Tie),
             _ => None,
         }
     }
@@ -92,6 +91,12 @@ impl<'a> Turn<'a> {
     fn new(player: &'a ActivePlayer, opponents: Vec<&'a ActivePlayer>) -> Self {
         Self { player, opponents }
     }
+}
+
+#[derive(Copy, Clone, Debug)]
+pub enum GameResult<'a> {
+    Winner(&'a ActivePlayer),
+    Tie,
 }
 
 #[cfg(test)]
