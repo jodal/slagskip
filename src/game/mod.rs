@@ -5,13 +5,13 @@ mod ship;
 use eyre::Result;
 
 pub use crate::game::grid::{Grid, Point};
-pub use crate::game::player::{Player, PlayerStatus};
+pub use crate::game::player::{ActivePlayer, NewPlayer};
 pub use crate::game::ship::{Direction, Ship};
 
 #[derive(Debug)]
 pub struct NewGame {
     grid_size: usize,
-    pub players: Vec<Player>,
+    pub players: Vec<NewPlayer>,
 }
 
 impl NewGame {
@@ -22,23 +22,28 @@ impl NewGame {
         }
     }
 
-    pub fn add_player(&mut self, name: &str) -> &Player {
-        let player = Player::new(name, self.grid_size);
+    pub fn add_player(&mut self, name: &str) -> &NewPlayer {
+        let player = NewPlayer::new(name, self.grid_size);
         self.players.push(player);
         self.players.last().unwrap()
     }
 
     pub fn start(self) -> Result<ActiveGame> {
+        let players = self
+            .players
+            .into_iter()
+            .filter_map(|np| np.ready().ok())
+            .collect();
+
         // TODO: Check that at least two players are ready to start
-        Ok(ActiveGame {
-            players: self.players,
-        })
+
+        Ok(ActiveGame { players })
     }
 }
 
 #[derive(Debug)]
 pub struct ActiveGame {
-    pub players: Vec<Player>,
+    pub players: Vec<ActivePlayer>,
 }
 
 impl ActiveGame {
@@ -57,12 +62,12 @@ impl ActiveGame {
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct Turn<'a> {
-    pub player: &'a Player,
-    pub opponents: Vec<&'a Player>,
+    pub player: &'a ActivePlayer,
+    pub opponents: Vec<&'a ActivePlayer>,
 }
 
 impl<'a> Turn<'a> {
-    fn new(player: &'a Player, opponents: Vec<&'a Player>) -> Self {
+    fn new(player: &'a ActivePlayer, opponents: Vec<&'a ActivePlayer>) -> Self {
         Self { player, opponents }
     }
 }

@@ -5,13 +5,13 @@ use eyre::{eyre, Result};
 use super::{Direction, Grid, Point, Ship};
 
 #[derive(Debug, Eq, PartialEq)]
-pub struct Player {
+pub struct NewPlayer {
     pub name: String,
     pub to_place: RefCell<Vec<Ship>>,
     pub grid: Grid,
 }
 
-impl Player {
+impl NewPlayer {
     pub fn new(name: &str, grid_size: usize) -> Self {
         Self {
             name: name.to_string(),
@@ -75,6 +75,33 @@ impl Player {
         Ok(())
     }
 
+    pub fn is_ready(&self) -> bool {
+        self.to_place.borrow().is_empty()
+    }
+
+    pub fn ready(self) -> Result<ActivePlayer> {
+        if !self.is_ready() {
+            return Err(eyre!(
+                "Player {} has not placed all ships: {:?}",
+                self.name,
+                self.to_place
+            ));
+        }
+
+        Ok(ActivePlayer {
+            name: self.name,
+            grid: self.grid,
+        })
+    }
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub struct ActivePlayer {
+    pub name: String,
+    pub grid: Grid,
+}
+
+impl ActivePlayer {
     pub fn fire_at(&self, x: usize, y: usize) -> Option<Ship> {
         self.grid.at(x, y).and_then(|cell| cell.fire())
     }
@@ -95,30 +122,16 @@ impl Player {
         None
     }
 
-    pub fn status(&self) -> PlayerStatus {
-        if self.to_place.borrow().len() != 0 {
-            return PlayerStatus::SETUP;
-        }
-
+    pub fn is_alive(&self) -> bool {
         let num_alive = self
             .grid
             .cells()
             .filter(|p| p.has_ship().is_some() && !p.is_hit())
             .count();
-
-        if num_alive > 0 {
-            return PlayerStatus::PLAYING;
-        }
-        return PlayerStatus::DEAD;
+        num_alive > 0
     }
 }
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
-pub enum PlayerStatus {
-    SETUP,
-    PLAYING,
-    DEAD,
-}
 #[cfg(test)]
 mod tests {
     use eyre::Result;
@@ -129,7 +142,7 @@ mod tests {
 
     #[test]
     fn place_ship_horizontal() -> Result<()> {
-        let player = Player::new("Alice", 3);
+        let player = NewPlayer::new("Alice", 3);
 
         player.place_ship(Ship::Destroyer, (0, 0), Direction::Horizontal)?;
 
@@ -139,7 +152,7 @@ mod tests {
 
     #[test]
     fn place_ship_vertical() -> Result<()> {
-        let player = Player::new("Alice", 3);
+        let player = NewPlayer::new("Alice", 3);
 
         player.place_ship(Ship::Destroyer, (1, 1), Direction::Vertical)?;
 
@@ -149,7 +162,7 @@ mod tests {
 
     #[test]
     fn place_ship_out_of_bounds() -> Result<()> {
-        let player = Player::new("Alice", 10);
+        let player = NewPlayer::new("Alice", 10);
 
         // When a destroyer of length two is placed on the last cell on a row
         let result = player.place_ship(Ship::Destroyer, (9, 0), Direction::Horizontal);
@@ -160,7 +173,7 @@ mod tests {
 
     #[test]
     fn place_ship_overlapping_existing_ship() -> Result<()> {
-        let player = Player::new("Alice", 10);
+        let player = NewPlayer::new("Alice", 10);
         // Given a carrier in the first five cells: CCCCC.....
         player.place_ship(Ship::Carrier, (0, 0), Direction::Horizontal)?;
 
@@ -173,7 +186,7 @@ mod tests {
 
     #[test]
     fn place_same_ship_twice() -> Result<()> {
-        let player = Player::new("Alice", 10);
+        let player = NewPlayer::new("Alice", 10);
         player.place_ship(Ship::Destroyer, (0, 0), Direction::Horizontal)?;
 
         let result = player.place_ship(Ship::Destroyer, (0, 1), Direction::Horizontal);
@@ -185,56 +198,55 @@ mod tests {
     #[test]
     fn fire_at() -> Result<()> {
         // Given a carrier: CCCCC.....
-        let player = Player::new("Alice", 10);
-        player.place_ship(Ship::Carrier, (0, 0), Direction::Horizontal)?;
+        let new_player = NewPlayer::new("Alice", 2);
+        new_player.place_ship(Ship::Destroyer, (0, 0), Direction::Horizontal)?;
+        let player = new_player.ready()?;
 
-        // CCCCCx.... is a miss
-        assert_eq!(player.fire_at(5, 0), None);
+        // CCx is a miss
+        assert_eq!(player.fire_at(2, 0), None);
 
-        // CCCXCx.... is a hit
-        assert_eq!(player.fire_at(3, 0), Some(Ship::Carrier));
+        // XCx is a hit
+        assert_eq!(player.fire_at(0, 0), Some(Ship::Destroyer));
 
         // Another hit in the same spot is a miss as there is no longer anything there
-        assert_eq!(player.fire_at(3, 0), None);
+        assert_eq!(player.fire_at(0, 0), None);
         Ok(())
     }
 
     #[test]
     fn status_checks_if_any_ships_remain() -> Result<()> {
-        let player = Player::new("Alice", 3);
-        assert_eq!(player.status(), PlayerStatus::SETUP);
-
-        player.place_ship(Ship::Submarine, (0, 0), Direction::Horizontal)?;
+        let new_player = NewPlayer::new("Alice", 3);
+        new_player.place_ship(Ship::Submarine, (0, 0), Direction::Horizontal)?;
 
         // There are more ships to place
-        assert_eq!(player.status(), PlayerStatus::SETUP);
+        assert!(!new_player.is_ready());
 
-        player.place_ship(Ship::Cruiser, (0, 1), Direction::Horizontal)?;
-        player.place_ship(Ship::Destroyer, (0, 2), Direction::Horizontal)?;
+        new_player.place_ship(Ship::Cruiser, (0, 1), Direction::Horizontal)?;
+        new_player.place_ship(Ship::Destroyer, (0, 2), Direction::Horizontal)?;
 
         // All ships have been placed
-        assert_eq!(player.status(), PlayerStatus::PLAYING);
+        let player = new_player.ready()?;
 
         // A miss
         player.fire_at(2, 2);
-        assert_eq!(player.status(), PlayerStatus::PLAYING);
+        assert!(player.is_alive());
 
         // Sink Submarine
         player.fire_at(0, 0);
         player.fire_at(1, 0);
         player.fire_at(2, 0);
-        assert_eq!(player.status(), PlayerStatus::PLAYING);
+        assert!(player.is_alive());
 
         // Sink Cruiser
         player.fire_at(0, 1);
         player.fire_at(1, 1);
         player.fire_at(2, 1);
-        assert_eq!(player.status(), PlayerStatus::PLAYING);
+        assert!(player.is_alive());
 
         // Sink Destroyer
         player.fire_at(0, 2);
         player.fire_at(1, 2);
-        assert_eq!(player.status(), PlayerStatus::DEAD);
+        assert!(!player.is_alive());
 
         Ok(())
     }
