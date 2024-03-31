@@ -22,6 +22,22 @@ impl<'a> CellWidget<'a> {
             is_active: cursor.is_some_and(|c| c == point),
         }
     }
+
+    pub fn content_height() -> usize {
+        1 // Line of text
+    }
+
+    pub fn content_width() -> usize {
+        2 // Line of text
+    }
+
+    pub fn box_height() -> usize {
+        CellWidget::content_height() + 1 // Border bottom
+    }
+
+    pub fn box_width() -> usize {
+        CellWidget::content_width() + 1 // Border right
+    }
 }
 
 impl Widget for CellWidget<'_> {

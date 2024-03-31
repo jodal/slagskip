@@ -44,6 +44,18 @@ impl Widget for PlayerWidget<'_> {
             ])
             .split(area);
 
+        let grid_widget = GridWidget::new(&self.player.grid, self.with_ships, self.cursor);
+        let grid_width = grid_widget.box_width() as u16;
+
+        let grid_layout = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints([
+                Constraint::Length((layout[2].width - grid_width) / 2),
+                Constraint::Length(grid_width),
+                Constraint::Min(0),
+            ])
+            .split(layout[2]);
+
         Gauge::default()
             .gauge_style(Style::default().fg(Color::Green).bg(Color::Red))
             .ratio(self.player.num_ships_alive() as f64 / self.player.num_ships_total() as f64)
@@ -54,6 +66,6 @@ impl Widget for PlayerWidget<'_> {
             ))
             .render(layout[0], buf);
 
-        GridWidget::new(&self.player.grid, self.with_ships, self.cursor).render(layout[2], buf);
+        grid_widget.render(grid_layout[1], buf);
     }
 }

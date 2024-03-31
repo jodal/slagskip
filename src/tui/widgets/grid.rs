@@ -22,14 +22,23 @@ impl<'a> GridWidget<'a> {
             cursor,
         }
     }
+
+    pub fn content_width(&self) -> usize {
+        CellWidget::box_width() * self.grid.size
+    }
+
+    pub fn box_width(&self) -> usize {
+        self.content_width()
+    }
 }
 
 impl Widget for GridWidget<'_> {
     fn render(self, area: Rect, buf: &mut Buffer) {
-        let row_constraints = std::iter::repeat(Constraint::Length(2))
-            .take(self.grid.size)
-            .collect::<Vec<_>>();
-        let col_constraints = std::iter::repeat(Constraint::Length(3))
+        let row_constraints =
+            std::iter::repeat(Constraint::Length(CellWidget::box_height() as u16))
+                .take(self.grid.size)
+                .collect::<Vec<_>>();
+        let col_constraints = std::iter::repeat(Constraint::Length(CellWidget::box_width() as u16))
             .take(self.grid.size)
             .collect::<Vec<_>>();
 
@@ -49,7 +58,8 @@ impl Widget for GridWidget<'_> {
             for (x, cell_rect) in col_rects.iter().enumerate() {
                 let point = Point(x, y);
                 let cell = self.grid.at(point).unwrap();
-                CellWidget::new(point, cell, self.with_ships, self.cursor).render(*cell_rect, buf);
+                let widget = CellWidget::new(point, cell, self.with_ships, self.cursor);
+                widget.render(*cell_rect, buf);
             }
         }
     }
