@@ -4,7 +4,30 @@ use slagskip::{
     game::{Fire, GameResult, NewGame},
 };
 
+use clap::{Parser, Subcommand};
+
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct Cli {
+    #[command(subcommand)]
+    command: Commands,
+}
+
+#[derive(Debug, Subcommand)]
+enum Commands {
+    /// Simulate a full game to exercise game engine.
+    Sim,
+}
+
 fn main() -> Result<()> {
+    let cli = Cli::parse();
+
+    match &cli.command {
+        Commands::Sim => sim(),
+    }
+}
+
+fn sim() -> Result<()> {
     let mut new_game = NewGame::new(10);
     new_game.add_player("Alice");
     new_game.add_player("Bob");
