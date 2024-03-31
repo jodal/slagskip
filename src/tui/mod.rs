@@ -1,4 +1,5 @@
 mod app;
+mod cursor;
 mod terminal;
 mod widgets;
 

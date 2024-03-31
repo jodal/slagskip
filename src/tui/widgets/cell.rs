@@ -9,17 +9,17 @@ use ratatui::{
 use crate::game::{Cell, Point};
 
 pub struct CellWidget<'a> {
-    point: Point,
     cell: &'a Cell,
     with_ships: bool,
+    is_active: bool,
 }
 
 impl<'a> CellWidget<'a> {
-    pub fn new(point: Point, cell: &'a Cell, with_ships: bool) -> Self {
+    pub fn new(point: Point, cell: &'a Cell, with_ships: bool, cursor: Option<Point>) -> Self {
         Self {
-            point,
             cell,
             with_ships,
+            is_active: cursor.is_some_and(|c| c == point),
         }
     }
 }
@@ -27,16 +27,21 @@ impl<'a> CellWidget<'a> {
 impl Widget for CellWidget<'_> {
     fn render(self, area: Rect, buf: &mut Buffer) {
         let text = match (self.cell.has_ship(), self.cell.is_hit()) {
-            (Some(_ship), false) if self.with_ships => "  ".on_white(),
-            (Some(_ship), true) if self.with_ships => "  ".on_red(),
+            (Some(_ship), false) if self.with_ships => "  ".on_green(),
+            (Some(_ship), true) => "  ".on_red(),
             (_, false) => "  ".on_blue(),
-            (_, true) => "  ".on_yellow(),
+            (_, true) => "  ".on_black(),
+        };
+        let border_style = if self.is_active {
+            Style::new().white()
+        } else {
+            Style::new().dark_gray()
         };
         Paragraph::new(text)
             .block(
                 Block::default()
-                    .borders(Borders::BOTTOM | Borders::RIGHT)
-                    .border_style(Style::new().dark_gray()),
+                    .borders(Borders::RIGHT | Borders::BOTTOM)
+                    .border_style(border_style),
             )
             .render(area, buf);
     }

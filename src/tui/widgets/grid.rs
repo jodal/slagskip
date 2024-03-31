@@ -11,11 +11,16 @@ use super::CellWidget;
 pub struct GridWidget<'a> {
     grid: &'a Grid,
     with_ships: bool,
+    cursor: Option<Point>,
 }
 
 impl<'a> GridWidget<'a> {
-    pub fn new(grid: &'a Grid, with_ships: bool) -> Self {
-        Self { grid, with_ships }
+    pub fn new(grid: &'a Grid, with_ships: bool, cursor: Option<Point>) -> Self {
+        Self {
+            grid,
+            with_ships,
+            cursor,
+        }
     }
 }
 
@@ -44,7 +49,7 @@ impl Widget for GridWidget<'_> {
             for (x, cell_rect) in col_rects.iter().enumerate() {
                 let point = Point(x, y);
                 let cell = self.grid.at(point).unwrap();
-                CellWidget::new(point, cell, self.with_ships).render(*cell_rect, buf);
+                CellWidget::new(point, cell, self.with_ships, self.cursor).render(*cell_rect, buf);
             }
         }
     }

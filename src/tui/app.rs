@@ -15,11 +15,12 @@ use ratatui::{
 
 use crate::game::ActiveGame;
 
-use super::{terminal, widgets::GridWidget};
+use super::{cursor::Cursor, terminal, widgets::GridWidget};
 
 #[derive(Debug)]
 pub struct App {
     game: ActiveGame,
+    cursor: Cursor,
     exit: bool,
 }
 
@@ -32,7 +33,12 @@ impl Default for App {
 impl App {
     pub fn new(game: ActiveGame) -> Self {
         assert_eq!(game.players.len(), 2);
-        App { game, exit: false }
+        let grid_size = game.players[0].grid.size;
+        App {
+            game,
+            cursor: Cursor::new(grid_size, grid_size),
+            exit: false,
+        }
     }
 
     pub fn run(&mut self, terminal: &mut terminal::Type) -> Result<()> {
@@ -60,20 +66,23 @@ impl App {
     fn handle_key_event(&mut self, key_event: KeyEvent) {
         match key_event.code {
             KeyCode::Char('q') | KeyCode::Esc => self.exit(),
-            KeyCode::Left => {
-                todo!();
+            KeyCode::Up | KeyCode::Char('w') => {
+                self.cursor.up();
             }
-            KeyCode::Right => {
-                todo!();
+            KeyCode::Left | KeyCode::Char('a') => {
+                self.cursor.left();
             }
-            KeyCode::Up => {
-                todo!();
+            KeyCode::Down | KeyCode::Char('s') => {
+                self.cursor.down();
             }
-            KeyCode::Down => {
-                todo!();
+            KeyCode::Right | KeyCode::Char('d') => {
+                self.cursor.right();
             }
-            KeyCode::Enter => {
-                todo!();
+            KeyCode::Char(' ') => {
+                self.game.players[1].fire_at(self.cursor.point);
+                // TODO Only give the opponent a turn if we hit a cell that has
+                // not been hit before.
+                self.game.players[0].fire_at_random();
             }
             _ => {}
         }
@@ -89,9 +98,9 @@ impl Widget for &App {
         let title = Title::from(" Slagskip ".bold().yellow());
         let instructions = Title::from(Line::from(vec![
             " Move ".into(),
-            "<L,R,U,D>".blue().bold(),
+            "WASD or arrows".blue().bold(),
             " Fire ".into(),
-            "<Enter>".blue().bold(),
+            "<Space>".blue().bold(),
             " Quit ".into(),
             "<Q> ".blue().bold(),
         ]));
@@ -123,7 +132,7 @@ impl Widget for &App {
             .vertical_margin(2)
             .constraints([Constraint::Percentage(100)])
             .split(players_rects[0]);
-        let you_grid = GridWidget::new(&self.game.players[0].grid, true);
+        let you_grid = GridWidget::new(&self.game.players[0].grid, true, None);
         you_grid.render(you_rects[0], buf);
 
         let opponent_block = Block::default()
@@ -136,7 +145,8 @@ impl Widget for &App {
             .vertical_margin(2)
             .constraints([Constraint::Percentage(100)])
             .split(players_rects[1]);
-        let opponent_grid = GridWidget::new(&self.game.players[1].grid, false);
+        let opponent_grid =
+            GridWidget::new(&self.game.players[1].grid, false, Some(self.cursor.point));
         opponent_grid.render(opponent_rects[0], buf);
     }
 }
