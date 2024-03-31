@@ -11,7 +11,7 @@ use self::app::App;
 
 pub fn main() -> Result<()> {
     let mut new_game = NewGame::new(10);
-    new_game.add_player("Human").place_ships_randomly()?;
+    new_game.add_player("Player").place_ships_randomly()?;
     new_game.add_player("Bot").place_ships_randomly()?;
     let game = new_game.start()?;
 

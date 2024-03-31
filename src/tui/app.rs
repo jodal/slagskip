@@ -15,7 +15,7 @@ use ratatui::{
 
 use crate::game::ActiveGame;
 
-use super::{cursor::Cursor, terminal, widgets::GridWidget};
+use super::{cursor::Cursor, terminal, widgets::PlayerWidget};
 
 #[derive(Debug)]
 pub struct App {
@@ -122,32 +122,18 @@ impl Widget for &App {
             .horizontal_margin(1)
             .split(area);
 
-        let you_block = Block::default()
-            .title(Title::from("Player".bold().blue()).alignment(Alignment::Center))
-            .borders(Borders::ALL);
-        you_block.render(players_rects[0], buf);
-        let you_rects = Layout::default()
-            .direction(Direction::Vertical)
-            .horizontal_margin(2)
-            .vertical_margin(2)
-            .constraints([Constraint::Percentage(100)])
-            .split(players_rects[0]);
-        let you_grid = GridWidget::new(&self.game.players[0].grid, true, None);
-        you_grid.render(you_rects[0], buf);
-
-        let opponent_block = Block::default()
-            .title(Title::from("Opponent".bold().red()).alignment(Alignment::Center))
-            .borders(Borders::ALL);
-        opponent_block.render(players_rects[1], buf);
-        let opponent_rects = Layout::default()
-            .direction(Direction::Vertical)
-            .horizontal_margin(2)
-            .vertical_margin(2)
-            .constraints([Constraint::Percentage(100)])
-            .split(players_rects[1]);
-        let opponent_grid =
-            GridWidget::new(&self.game.players[1].grid, false, Some(self.cursor.point));
-        opponent_grid.render(opponent_rects[0], buf);
+        for (i, player) in self.game.players.iter().enumerate() {
+            PlayerWidget::new(
+                player,
+                i == 0,
+                if i == 0 {
+                    None
+                } else {
+                    Some(self.cursor.point)
+                },
+            )
+            .render(players_rects[i], buf);
+        }
     }
 }
 
