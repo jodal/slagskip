@@ -13,6 +13,7 @@ pub fn main() -> Result<()> {
     new_game.add_player("Bot").place_ships_randomly()?;
     let game = new_game.start()?;
 
+    terminal::install_panic_hook();
     let mut terminal = terminal::init()?;
     let app_result = App::new(game).run(&mut terminal);
     terminal::restore()?;
