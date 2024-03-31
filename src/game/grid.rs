@@ -87,18 +87,18 @@ impl Cell {
         *self.ship.borrow_mut() = Some(ship);
     }
 
-    pub(crate) fn fire(&self) -> Fire {
+    pub(crate) fn fire(&self) -> Option<Fire> {
         if self.is_hit() {
-            return Fire::Miss;
+            return None;
         }
         *self.hit.borrow_mut() = true;
         match self.has_ship() {
             Some(_ship) => {
                 // TODO Detect if entire ship is hit, and if so return Sunk(ship)
-                return Fire::Hit;
+                return Some(Fire::Hit);
             }
             None => {
-                return Fire::Miss;
+                return Some(Fire::Miss);
             }
         }
     }

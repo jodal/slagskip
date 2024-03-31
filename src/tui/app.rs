@@ -79,10 +79,9 @@ impl App {
                 self.cursor.right();
             }
             KeyCode::Char(' ') => {
-                self.game.players[1].fire_at(self.cursor.point);
-                // TODO Only give the opponent a turn if we hit a cell that has
-                // not been hit before.
-                self.game.players[0].fire_at_random();
+                if let Some(_fire) = self.game.players[1].fire_at(self.cursor.point) {
+                    self.game.players[0].fire_at_random();
+                }
             }
             _ => {}
         }

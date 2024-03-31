@@ -134,7 +134,7 @@ impl Default for ActivePlayer {
 
 impl ActivePlayer {
     pub fn fire_at(&self, point: Point) -> Option<Fire> {
-        self.grid.at(point).and_then(|cell| Some(cell.fire()))
+        self.grid.at(point).and_then(|cell| cell.fire())
     }
 
     pub fn fire_at_random(&self) -> Option<(Point, Fire)> {
@@ -146,7 +146,7 @@ impl ActivePlayer {
                     // Select a new cell to hit
                 }
                 false => {
-                    return Some((point, cell.fire()));
+                    return Some((point, cell.fire().unwrap()));
                 }
             }
         }
@@ -245,8 +245,8 @@ mod tests {
         // XC/x. is a hit
         assert_eq!(player.fire_at(Point(0, 0)), Some(Fire::Hit));
 
-        // Another hit in the same spot is a miss as there is no longer anything there
-        assert_eq!(player.fire_at(Point(0, 0)), Some(Fire::Miss));
+        // Another hit in the same spot does not count as a move
+        assert_eq!(player.fire_at(Point(0, 0)), None);
         Ok(())
     }
 
