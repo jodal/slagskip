@@ -33,7 +33,7 @@ impl Default for App {
 impl App {
     pub fn new(game: ActiveGame) -> Self {
         assert_eq!(game.players.len(), 2);
-        let grid_size = game.players[0].grid.size;
+        let grid_size = game.grid_size;
         App {
             game,
             cursor: Cursor::new(grid_size, grid_size),

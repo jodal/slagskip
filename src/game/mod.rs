@@ -43,18 +43,23 @@ impl NewGame {
             .filter_map(|np| np.ready().ok())
             .collect();
 
-        Ok(ActiveGame { players })
+        Ok(ActiveGame {
+            grid_size: self.grid_size,
+            players,
+        })
     }
 }
 
 #[derive(Debug)]
 pub struct ActiveGame {
+    pub grid_size: usize,
     pub players: Vec<ActivePlayer>,
 }
 
 impl Default for ActiveGame {
     fn default() -> Self {
         Self {
+            grid_size: 10,
             players: vec![ActivePlayer::default(), ActivePlayer::default()],
         }
     }
