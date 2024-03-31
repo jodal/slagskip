@@ -153,13 +153,19 @@ impl ActivePlayer {
         None
     }
 
-    pub fn is_alive(&self) -> bool {
-        let num_alive = self
-            .grid
+    pub fn num_ships_total(&self) -> usize {
+        self.grid.cells().filter(|p| p.has_ship().is_some()).count()
+    }
+
+    pub fn num_ships_alive(&self) -> usize {
+        self.grid
             .cells()
             .filter(|p| p.has_ship().is_some() && !p.is_hit())
-            .count();
-        num_alive > 0
+            .count()
+    }
+
+    pub fn is_alive(&self) -> bool {
+        self.num_ships_alive() > 0
     }
 }
 

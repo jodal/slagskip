@@ -1,5 +1,6 @@
 use crate::game::{ActivePlayer, Point};
-use ratatui::widgets::{Block, Widget};
+use ratatui::style::{Color, Style};
+use ratatui::widgets::{Block, Gauge, Widget};
 use ratatui::{
     buffer::Buffer,
     layout::{Alignment, Constraint, Direction, Layout, Rect},
@@ -36,9 +37,23 @@ impl Widget for PlayerWidget<'_> {
             .direction(Direction::Vertical)
             .horizontal_margin(2)
             .vertical_margin(2)
-            .constraints([Constraint::Percentage(100)])
+            .constraints([
+                Constraint::Length(1),
+                Constraint::Length(1),
+                Constraint::Percentage(100),
+            ])
             .split(area);
 
-        GridWidget::new(&self.player.grid, self.with_ships, self.cursor).render(layout[0], buf);
+        Gauge::default()
+            .gauge_style(Style::default().fg(Color::Green).bg(Color::Red))
+            .ratio(self.player.num_ships_alive() as f64 / self.player.num_ships_total() as f64)
+            .label(format!(
+                "{}/{}",
+                self.player.num_ships_alive(),
+                self.player.num_ships_total()
+            ))
+            .render(layout[0], buf);
+
+        GridWidget::new(&self.player.grid, self.with_ships, self.cursor).render(layout[2], buf);
     }
 }
