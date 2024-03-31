@@ -2,7 +2,7 @@ use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 use eyre::Result;
 use ratatui::{
     buffer::Buffer,
-    layout::{Alignment, Rect},
+    layout::{Alignment, Constraint, Direction, Layout, Rect},
     prelude::Stylize,
     symbols::border,
     text::Line,
@@ -15,7 +15,7 @@ use ratatui::{
 
 use crate::game::ActiveGame;
 
-use super::terminal;
+use super::{terminal, widgets::GridWidget};
 
 #[derive(Debug)]
 pub struct App {
@@ -95,7 +95,7 @@ impl Widget for &App {
             " Quit ".into(),
             "<Q> ".blue().bold(),
         ]));
-        let block = Block::default()
+        let frame_block = Block::default()
             .title(title.alignment(Alignment::Center))
             .title(
                 instructions
@@ -104,8 +104,40 @@ impl Widget for &App {
             )
             .borders(Borders::ALL)
             .border_set(border::THICK);
+        frame_block.render(area, buf);
 
-        block.render(area, buf);
+        let players_rects = Layout::default()
+            .direction(Direction::Horizontal)
+            .constraints([Constraint::Percentage(50), Constraint::Percentage(50)])
+            .vertical_margin(1)
+            .horizontal_margin(1)
+            .split(area);
+
+        let you_block = Block::default()
+            .title(Title::from("Player".bold().blue()).alignment(Alignment::Center))
+            .borders(Borders::ALL);
+        you_block.render(players_rects[0], buf);
+        let you_rects = Layout::default()
+            .direction(Direction::Vertical)
+            .horizontal_margin(2)
+            .vertical_margin(2)
+            .constraints([Constraint::Percentage(100)])
+            .split(players_rects[0]);
+        let you_grid = GridWidget::new(&self.game.players[0].grid, true);
+        you_grid.render(you_rects[0], buf);
+
+        let opponent_block = Block::default()
+            .title(Title::from("Opponent".bold().red()).alignment(Alignment::Center))
+            .borders(Borders::ALL);
+        opponent_block.render(players_rects[1], buf);
+        let opponent_rects = Layout::default()
+            .direction(Direction::Vertical)
+            .horizontal_margin(2)
+            .vertical_margin(2)
+            .constraints([Constraint::Percentage(100)])
+            .split(players_rects[1]);
+        let opponent_grid = GridWidget::new(&self.game.players[1].grid, false);
+        opponent_grid.render(opponent_rects[0], buf);
     }
 }
 

@@ -62,7 +62,7 @@ impl fmt::Display for Grid {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub(crate) struct Cell {
+pub struct Cell {
     ship: RefCell<Option<Ship>>,
     hit: RefCell<bool>,
 }
