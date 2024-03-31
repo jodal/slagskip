@@ -224,10 +224,10 @@ mod tests {
         new_player.place_ship(Ship::Destroyer, Point(0, 0), Direction::Horizontal)?;
         let player = new_player.ready()?;
 
-        // CCx is a miss
-        assert_eq!(player.fire_at(Point(2, 0)), Some(Fire::Miss));
+        // CC/x. is a miss
+        assert_eq!(player.fire_at(Point(0, 1)), Some(Fire::Miss));
 
-        // XCx is a hit
+        // XC/x. is a hit
         assert_eq!(player.fire_at(Point(0, 0)), Some(Fire::Hit));
 
         // Another hit in the same spot is a miss as there is no longer anything there
