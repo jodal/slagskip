@@ -52,6 +52,14 @@ pub struct ActiveGame {
     pub players: Vec<ActivePlayer>,
 }
 
+impl Default for ActiveGame {
+    fn default() -> Self {
+        Self {
+            players: vec![ActivePlayer::default(), ActivePlayer::default()],
+        }
+    }
+}
+
 impl ActiveGame {
     fn alive_players(&self) -> Vec<&ActivePlayer> {
         self.players.iter().filter(|p| p.is_alive()).collect()

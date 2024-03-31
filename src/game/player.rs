@@ -123,6 +123,15 @@ pub struct ActivePlayer {
     pub grid: Grid,
 }
 
+impl Default for ActivePlayer {
+    fn default() -> Self {
+        Self {
+            name: "Default".into(),
+            grid: Grid::new(10),
+        }
+    }
+}
+
 impl ActivePlayer {
     pub fn fire_at(&self, point: Point) -> Option<Fire> {
         self.grid.at(point).and_then(|cell| Some(cell.fire()))
