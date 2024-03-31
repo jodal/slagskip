@@ -1,5 +1,5 @@
 use eyre::Result;
 
-pub fn tui() -> Result<()> {
+pub fn main() -> Result<()> {
     Ok(())
 }

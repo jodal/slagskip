@@ -2,7 +2,7 @@ use eyre::Result;
 
 use crate::game::{Fire, GameResult, Grid, NewGame};
 
-pub fn sim() -> Result<()> {
+pub fn main() -> Result<()> {
     let mut new_game = NewGame::new(10);
     new_game.add_player("Alice");
     new_game.add_player("Bob");

@@ -1,8 +1,8 @@
 use eyre::Result;
 
 use clap::{Parser, Subcommand};
-use slagskip::sim::sim;
-use slagskip::tui::tui;
+use slagskip::sim;
+use slagskip::tui;
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -24,7 +24,7 @@ fn main() -> Result<()> {
     let cli = Cli::parse();
 
     match &cli.command {
-        Commands::Sim => sim(),
-        Commands::Tui => tui(),
+        Commands::Sim => sim::main(),
+        Commands::Tui => tui::main(),
     }
 }
