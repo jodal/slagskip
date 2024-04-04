@@ -38,9 +38,9 @@ impl Widget for PlayerWidget<'_> {
             .horizontal_margin(2)
             .vertical_margin(2)
             .constraints([
-                Constraint::Length(1),
-                Constraint::Length(1),
                 Constraint::Percentage(100),
+                Constraint::Length(1),
+                Constraint::Length(1),
             ])
             .split(area);
 
@@ -54,7 +54,7 @@ impl Widget for PlayerWidget<'_> {
                 Constraint::Length(grid_width),
                 Constraint::Min(0),
             ])
-            .split(layout[2]);
+            .split(layout[0]);
 
         Gauge::default()
             .gauge_style(Style::default().fg(Color::Green).bg(Color::Red))
@@ -64,7 +64,7 @@ impl Widget for PlayerWidget<'_> {
                 self.player.num_ships_alive(),
                 self.player.num_ships_total()
             ))
-            .render(layout[0], buf);
+            .render(layout[2], buf);
 
         grid_widget.render(grid_layout[1], buf);
     }
