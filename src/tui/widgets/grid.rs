@@ -30,6 +30,14 @@ impl<'a> GridWidget<'a> {
     pub fn box_width(&self) -> usize {
         self.content_width()
     }
+
+    pub fn content_height(&self) -> usize {
+        CellWidget::box_height() * self.grid.size
+    }
+
+    pub fn box_height(&self) -> usize {
+        self.content_height()
+    }
 }
 
 impl Widget for GridWidget<'_> {
