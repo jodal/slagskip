@@ -55,7 +55,7 @@ fn one_ship_game() -> Result<()> {
             GameResult::Winner(winner) => {
                 assert_eq!(winner.name, "Bob");
             }
-            GameResult::Tie => {
+            GameResult::Draw => {
                 panic!("Game should end with a winner, but ended in a tie.")
             }
         }

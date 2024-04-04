@@ -55,7 +55,7 @@ pub fn main() -> Result<()> {
             println!("{} won!", winner.name);
             println!();
         }
-        Some(GameResult::Tie) => {
+        Some(GameResult::Draw) => {
             println!("Game ended in a tie!");
             println!();
         }

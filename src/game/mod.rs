@@ -73,7 +73,7 @@ impl ActiveGame {
     pub fn result(&self) -> Option<GameResult> {
         match self.alive_players()[..] {
             [player] => Some(GameResult::Winner(player)),
-            [] => Some(GameResult::Tie),
+            [] => Some(GameResult::Draw),
             _ => None,
         }
     }
@@ -109,7 +109,7 @@ impl<'a> Turn<'a> {
 #[derive(Copy, Clone, Debug)]
 pub enum GameResult<'a> {
     Winner(&'a ActivePlayer),
-    Tie,
+    Draw,
 }
 
 #[cfg(test)]
