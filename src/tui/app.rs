@@ -136,6 +136,26 @@ impl Widget for &App {
     }
 }
 
+pub(crate) fn centered_rect(width: u16, height: u16, area: Rect) -> Rect {
+    let vertical_layout = Layout::default()
+        .direction(Direction::Vertical)
+        .constraints([
+            Constraint::Length(area.height / 2 - height / 2),
+            Constraint::Length(height),
+            Constraint::Length(area.height / 2 - height / 2),
+        ])
+        .split(area);
+    let horizontal_layout = Layout::default()
+        .direction(Direction::Horizontal)
+        .constraints([
+            Constraint::Length(area.width / 2 - width / 2),
+            Constraint::Length(width),
+            Constraint::Length(area.width / 2 - width / 2),
+        ])
+        .split(vertical_layout[1]);
+    horizontal_layout[1]
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
