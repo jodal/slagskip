@@ -4,16 +4,17 @@ use ratatui::{
     buffer::Buffer,
     layout::{Alignment, Constraint, Direction, Layout, Rect},
     prelude::Stylize,
+    style::{Modifier, Style},
     symbols::border,
     text::Line,
     widgets::{
         block::{Position, Title},
-        Block, Borders, Widget,
+        Block, BorderType, Borders, Paragraph, Widget,
     },
     Frame,
 };
 
-use crate::game::ActiveGame;
+use crate::game::{ActiveGame, GameResult};
 
 use super::{cursor::Cursor, terminal, widgets::PlayerWidget};
 
@@ -21,6 +22,7 @@ use super::{cursor::Cursor, terminal, widgets::PlayerWidget};
 pub struct App {
     game: ActiveGame,
     cursor: Cursor,
+    message: Option<String>,
     exit: bool,
 }
 
@@ -37,6 +39,7 @@ impl App {
         App {
             game,
             cursor: Cursor::new(grid_size, grid_size),
+            message: None,
             exit: false,
         }
     }
@@ -81,6 +84,16 @@ impl App {
             KeyCode::Char(' ') => {
                 if let Some(_fire) = self.game.players[1].fire_at(self.cursor.point) {
                     self.game.players[0].fire_at_random();
+                }
+
+                match self.game.result() {
+                    Some(GameResult::Winner(player)) => {
+                        self.message = Some(format!("{} won!", player.name));
+                    }
+                    Some(GameResult::Draw) => {
+                        self.message = Some("It's a draw!".into());
+                    }
+                    None => {}
                 }
             }
             _ => {}
@@ -132,6 +145,21 @@ impl Widget for &App {
                 },
             )
             .render(players_rects[i], buf);
+        }
+
+        if let Some(message) = &self.message {
+            let message_area = centered_rect(20, 3, area);
+            let message_paragraph = Paragraph::new(message.clone())
+                .block(
+                    Block::default()
+                        .borders(Borders::ALL)
+                        .border_type(BorderType::Thick)
+                        .border_style(Style::default().yellow().add_modifier(Modifier::BOLD))
+                        .style(Style::default().add_modifier(Modifier::BOLD)),
+                )
+                .alignment(Alignment::Center)
+                .style(Style::default());
+            message_paragraph.render(message_area, buf);
         }
     }
 }
