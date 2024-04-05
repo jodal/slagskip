@@ -82,6 +82,10 @@ impl App {
                 self.cursor.right();
             }
             KeyCode::Char(' ') => {
+                if self.game.result().is_some() {
+                    return; // Game has ended
+                }
+
                 if let Some(_fire) = self.game.players[1].fire_at(self.cursor.point) {
                     self.game.players[0].fire_at_random();
                 }
