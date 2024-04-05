@@ -3,7 +3,13 @@ mod grid;
 mod player;
 mod ship;
 
-pub use crate::game::game::{ActiveGame, GameResult, NewGame};
+#[derive(Debug, Eq, PartialEq)]
+pub struct New;
+
+#[derive(Debug, Eq, PartialEq)]
+pub struct Active;
+
+pub use crate::game::game::{Game, GameResult};
 pub use crate::game::grid::{Cell, Fire, Grid, Point};
-pub use crate::game::player::{ActivePlayer, NewPlayer};
+pub use crate::game::player::Player;
 pub use crate::game::ship::{Direction, Ship};

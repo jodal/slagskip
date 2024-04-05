@@ -1,23 +1,38 @@
 use eyre::{eyre, Result};
 
-use crate::game::player::{ActivePlayer, NewPlayer};
+use crate::game::player::Player;
+
+use super::{Active, New};
 
 #[derive(Debug)]
-pub struct NewGame {
-    grid_size: usize,
-    pub players: Vec<NewPlayer>,
+pub struct Game<Stage> {
+    stage: std::marker::PhantomData<Stage>,
+    pub grid_size: usize,
+    pub players: Vec<Player<Stage>>,
 }
 
-impl NewGame {
-    pub fn new(grid_size: usize) -> Self {
+impl Default for Game<Active> {
+    fn default() -> Self {
+        // Only used for test setup.
         Self {
+            stage: std::marker::PhantomData::<Active>,
+            grid_size: 10,
+            players: vec![Player::<Active>::default(), Player::<Active>::default()],
+        }
+    }
+}
+
+impl Game<New> {
+    pub fn new(grid_size: usize) -> Game<New> {
+        Self {
+            stage: std::marker::PhantomData::<New>,
             grid_size,
             players: vec![],
         }
     }
 
-    pub fn add_player(&mut self, name: &str) -> &NewPlayer {
-        let player = NewPlayer::new(name, self.grid_size);
+    pub fn add_player(&mut self, name: &str) -> &Player<New> {
+        let player = Player::new(name, self.grid_size);
         self.players.push(player);
         self.players.last().unwrap()
     }
@@ -26,7 +41,7 @@ impl NewGame {
         self.players.iter().filter(|np| np.is_ready()).count() >= 2
     }
 
-    pub fn start(self) -> Result<ActiveGame> {
+    pub fn start(self) -> Result<Game<Active>> {
         if !self.is_ready() {
             return Err(eyre!("Not enough players are ready to start."));
         }
@@ -37,30 +52,16 @@ impl NewGame {
             .filter_map(|np| np.ready().ok())
             .collect();
 
-        Ok(ActiveGame {
+        Ok(Game {
+            stage: std::marker::PhantomData::<Active>,
             grid_size: self.grid_size,
             players,
         })
     }
 }
 
-#[derive(Debug)]
-pub struct ActiveGame {
-    pub grid_size: usize,
-    pub players: Vec<ActivePlayer>,
-}
-
-impl Default for ActiveGame {
-    fn default() -> Self {
-        Self {
-            grid_size: 10,
-            players: vec![ActivePlayer::default(), ActivePlayer::default()],
-        }
-    }
-}
-
-impl ActiveGame {
-    fn alive_players(&self) -> Vec<&ActivePlayer> {
+impl Game<Active> {
+    fn alive_players(&self) -> Vec<&Player<Active>> {
         self.players.iter().filter(|p| p.is_alive()).collect()
     }
 
@@ -90,19 +91,19 @@ impl ActiveGame {
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct Turn<'a> {
-    pub player: &'a ActivePlayer,
-    pub opponents: Vec<&'a ActivePlayer>,
+    pub player: &'a Player<Active>,
+    pub opponents: Vec<&'a Player<Active>>,
 }
 
 impl<'a> Turn<'a> {
-    fn new(player: &'a ActivePlayer, opponents: Vec<&'a ActivePlayer>) -> Self {
+    fn new(player: &'a Player<Active>, opponents: Vec<&'a Player<Active>>) -> Self {
         Self { player, opponents }
     }
 }
 
 #[derive(Copy, Clone, Debug)]
 pub enum GameResult<'a> {
-    Winner(&'a ActivePlayer),
+    Winner(&'a Player<Active>),
     Draw,
 }
 
@@ -114,7 +115,7 @@ mod tests {
 
     #[test]
     fn game_setup() -> Result<()> {
-        let mut new_game = NewGame::new(10);
+        let mut new_game = Game::new(10);
 
         let alice = new_game.add_player("Alice");
         assert_eq!(alice.name, "Alice");
@@ -135,7 +136,7 @@ mod tests {
 
     #[test]
     fn round_pairs_each_player_with_opponents() -> Result<()> {
-        let mut new_game = NewGame::new(10);
+        let mut new_game = Game::new(10);
         let alice = new_game.add_player("Alice");
         alice.place_ships_randomly()?;
         let bob = new_game.add_player("Bob");

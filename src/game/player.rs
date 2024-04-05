@@ -2,18 +2,32 @@ use std::cell::RefCell;
 
 use eyre::{eyre, Result};
 
-use super::{grid::Fire, Direction, Grid, Point, Ship};
+use super::{grid::Fire, Active, Direction, Grid, New, Point, Ship};
 
 #[derive(Debug, Eq, PartialEq)]
-pub struct NewPlayer {
+pub struct Player<Stage> {
+    stage: std::marker::PhantomData<Stage>,
     pub name: String,
     pub to_place: RefCell<Vec<Ship>>,
     pub grid: Grid,
 }
 
-impl NewPlayer {
-    pub fn new(name: &str, grid_size: usize) -> Self {
+impl Default for Player<Active> {
+    fn default() -> Self {
+        // Only used for test setup.
         Self {
+            stage: std::marker::PhantomData::<Active>,
+            name: "Default".into(),
+            to_place: RefCell::new(vec![]),
+            grid: Grid::new(10),
+        }
+    }
+}
+
+impl Player<New> {
+    pub fn new(name: &str, grid_size: usize) -> Player<New> {
+        Self {
+            stage: std::marker::PhantomData::<New>,
             name: name.to_string(),
             to_place: RefCell::new(Ship::for_grid(grid_size)),
             grid: Grid::new(grid_size),
@@ -101,7 +115,7 @@ impl NewPlayer {
         self.to_place.borrow().is_empty()
     }
 
-    pub fn ready(self) -> Result<ActivePlayer> {
+    pub fn ready(self) -> Result<Player<Active>> {
         if !self.is_ready() {
             return Err(eyre!(
                 "Player {} has not placed all ships: {:?}",
@@ -110,29 +124,16 @@ impl NewPlayer {
             ));
         }
 
-        Ok(ActivePlayer {
+        Ok(Player {
+            stage: std::marker::PhantomData::<Active>,
             name: self.name,
+            to_place: self.to_place,
             grid: self.grid,
         })
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
-pub struct ActivePlayer {
-    pub name: String,
-    pub grid: Grid,
-}
-
-impl Default for ActivePlayer {
-    fn default() -> Self {
-        Self {
-            name: "Default".into(),
-            grid: Grid::new(10),
-        }
-    }
-}
-
-impl ActivePlayer {
+impl Player<Active> {
     pub fn fire_at(&self, point: Point) -> Option<Fire> {
         self.grid.at(point).and_then(|cell| cell.fire())
     }
@@ -179,7 +180,7 @@ mod tests {
 
     #[test]
     fn place_ship_horizontal() -> Result<()> {
-        let player = NewPlayer::new("Alice", 3);
+        let player = Player::new("Alice", 3);
 
         player.place_ship(Ship::Destroyer, Point(0, 0), Direction::Horizontal)?;
 
@@ -189,7 +190,7 @@ mod tests {
 
     #[test]
     fn place_ship_vertical() -> Result<()> {
-        let player = NewPlayer::new("Alice", 3);
+        let player = Player::new("Alice", 3);
 
         player.place_ship(Ship::Destroyer, Point(1, 1), Direction::Vertical)?;
 
@@ -199,7 +200,7 @@ mod tests {
 
     #[test]
     fn place_ship_out_of_bounds() -> Result<()> {
-        let player = NewPlayer::new("Alice", 10);
+        let player = Player::new("Alice", 10);
 
         // When a destroyer of length two is placed on the last cell on a row
         let result = player.place_ship(Ship::Destroyer, Point(9, 0), Direction::Horizontal);
@@ -210,7 +211,7 @@ mod tests {
 
     #[test]
     fn place_ship_overlapping_existing_ship() -> Result<()> {
-        let player = NewPlayer::new("Alice", 10);
+        let player = Player::new("Alice", 10);
         // Given a carrier in the first five cells: CCCCC.....
         player.place_ship(Ship::Carrier, Point(0, 0), Direction::Horizontal)?;
 
@@ -223,7 +224,7 @@ mod tests {
 
     #[test]
     fn place_same_ship_twice() -> Result<()> {
-        let player = NewPlayer::new("Alice", 10);
+        let player = Player::new("Alice", 10);
         player.place_ship(Ship::Destroyer, Point(0, 0), Direction::Horizontal)?;
 
         let result = player.place_ship(Ship::Destroyer, Point(0, 1), Direction::Horizontal);
@@ -235,7 +236,7 @@ mod tests {
     #[test]
     fn fire_at() -> Result<()> {
         // Given a carrier: CCCCC.....
-        let new_player = NewPlayer::new("Alice", 2);
+        let new_player = Player::new("Alice", 2);
         new_player.place_ship(Ship::Destroyer, Point(0, 0), Direction::Horizontal)?;
         let player = new_player.ready()?;
 
@@ -252,7 +253,7 @@ mod tests {
 
     #[test]
     fn status_checks_if_any_ships_remain() -> Result<()> {
-        let new_player = NewPlayer::new("Alice", 3);
+        let new_player = Player::new("Alice", 3);
         new_player.place_ship(Ship::Submarine, Point(0, 0), Direction::Horizontal)?;
 
         // There are more ships to place

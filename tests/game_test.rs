@@ -1,22 +1,22 @@
 use eyre::Result;
-use slagskip::game::{Direction, GameResult, NewGame, Point, Ship};
+use slagskip::game::{Direction, Game, GameResult, Point, Ship};
 
 #[test]
 fn one_ship_game() -> Result<()> {
-    let mut new_game = NewGame::new(2);
-    new_game.add_player("Alice");
-    new_game.add_player("Bob");
+    let mut game = Game::new(2);
+    game.add_player("Alice");
+    game.add_player("Bob");
 
     {
-        let alice = &new_game.players[0];
-        let bob = &new_game.players[1];
+        let alice = &game.players[0];
+        let bob = &game.players[1];
 
         // Place ships
         alice.place_ship(Ship::Destroyer, Point(0, 0), Direction::Horizontal)?;
         bob.place_ship(Ship::Destroyer, Point(1, 0), Direction::Vertical)?;
     }
 
-    let game = new_game.start()?;
+    let game = game.start()?;
 
     {
         let alice = &game.players[0];

@@ -1,15 +1,15 @@
 use eyre::Result;
 
-use crate::game::{Fire, GameResult, Grid, NewGame};
+use crate::game::{Fire, Game, GameResult, Grid};
 
 pub fn main() -> Result<()> {
-    let mut new_game = NewGame::new(10);
-    new_game.add_player("Alice");
-    new_game.add_player("Bob");
+    let mut game = Game::new(10);
+    game.add_player("Alice");
+    game.add_player("Bob");
 
     println!("Placing ships...");
     println!();
-    for player in new_game.players.iter() {
+    for player in game.players.iter() {
         player.place_ships_randomly()?;
         println!(">>> {}", player.name);
         println!();
@@ -17,7 +17,7 @@ pub fn main() -> Result<()> {
         println!();
     }
 
-    let game = new_game.start()?;
+    let game = game.start()?;
 
     while game.result().is_none() {
         for turn in game.round() {

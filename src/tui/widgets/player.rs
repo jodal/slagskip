@@ -1,4 +1,4 @@
-use crate::game::{ActivePlayer, Point};
+use crate::game::{Active, Player, Point};
 use crate::tui::app::centered_rect;
 use ratatui::style::{Color, Style};
 use ratatui::widgets::{Block, Gauge, Widget};
@@ -12,13 +12,13 @@ use ratatui::{
 use super::GridWidget;
 
 pub struct PlayerWidget<'a> {
-    player: &'a ActivePlayer,
+    player: &'a Player<Active>,
     with_ships: bool,
     cursor: Option<Point>,
 }
 
 impl<'a> PlayerWidget<'a> {
-    pub fn new(player: &'a ActivePlayer, with_ships: bool, cursor: Option<Point>) -> Self {
+    pub fn new(player: &'a Player<Active>, with_ships: bool, cursor: Option<Point>) -> Self {
         Self {
             player,
             with_ships,

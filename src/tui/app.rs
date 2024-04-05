@@ -14,13 +14,13 @@ use ratatui::{
     Frame,
 };
 
-use crate::game::{ActiveGame, GameResult};
+use crate::game::{Active, Game, GameResult};
 
 use super::{cursor::Cursor, terminal, widgets::PlayerWidget};
 
 #[derive(Debug)]
 pub struct App {
-    game: ActiveGame,
+    game: Game<Active>,
     cursor: Cursor,
     message: Option<String>,
     exit: bool,
@@ -28,12 +28,13 @@ pub struct App {
 
 impl Default for App {
     fn default() -> Self {
-        Self::new(ActiveGame::default())
+        // Only used for test setup.
+        Self::new(Game::<Active>::default())
     }
 }
 
 impl App {
-    pub fn new(game: ActiveGame) -> Self {
+    pub fn new(game: Game<Active>) -> Self {
         assert_eq!(game.players.len(), 2);
         let grid_size = game.grid_size;
         App {
