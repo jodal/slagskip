@@ -10,30 +10,30 @@ pub struct Grid {
 }
 
 impl Grid {
-    pub(crate) fn new(size: usize) -> Self {
+    pub fn new(size: usize) -> Self {
         Grid {
             size,
             cells: vec![vec![Cell::new(); size]; size],
         }
     }
 
-    pub(crate) fn cells(&self) -> CellIter {
+    pub fn cells(&self) -> CellIter {
         CellIter::new(&self.cells)
     }
 
-    pub(crate) fn at(&self, point: Point) -> Option<&Cell> {
+    pub fn at(&self, point: Point) -> Option<&Cell> {
         if (point.0 >= self.size) || (point.1 >= self.size) {
             return None;
         }
         Some(&self.cells[point.0][point.1])
     }
 
-    pub(crate) fn random_point(&self) -> Point {
+    pub fn random_point(&self) -> Point {
         let mut rng = thread_rng();
         Point(rng.gen_range(0..self.size), rng.gen_range(0..self.size))
     }
 
-    pub(crate) fn random_cell(&self) -> (Point, &Cell) {
+    pub fn random_cell(&self) -> (Point, &Cell) {
         let point = self.random_point();
         (point, self.at(point).unwrap())
     }
@@ -75,19 +75,19 @@ impl Cell {
         }
     }
 
-    pub(crate) fn has_ship(&self) -> Option<Ship> {
+    pub fn has_ship(&self) -> Option<Ship> {
         self.ship.borrow().to_owned()
     }
 
-    pub(crate) fn is_hit(&self) -> bool {
+    pub fn is_hit(&self) -> bool {
         *self.hit.borrow()
     }
 
-    pub(crate) fn place_ship(&self, ship: Ship) {
+    pub fn place_ship(&self, ship: Ship) {
         *self.ship.borrow_mut() = Some(ship);
     }
 
-    pub(crate) fn fire(&self) -> Option<Fire> {
+    pub fn fire(&self) -> Option<Fire> {
         if self.is_hit() {
             return None;
         }
@@ -104,7 +104,7 @@ impl Cell {
     }
 }
 
-pub(crate) struct CellIter<'a> {
+pub struct CellIter<'a> {
     cells: &'a Vec<Vec<Cell>>,
     row_index: usize,
     column_index: usize,

@@ -41,7 +41,7 @@ impl Direction {
         }
     }
 
-    pub(crate) fn step(&self) -> (usize, usize) {
+    pub fn step(&self) -> (usize, usize) {
         match self {
             Self::Horizontal => (1, 0),
             Self::Vertical => (0, 1),

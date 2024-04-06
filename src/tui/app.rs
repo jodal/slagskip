@@ -169,7 +169,7 @@ impl Widget for &App {
     }
 }
 
-pub(crate) fn centered_rect(width: u16, height: u16, area: Rect) -> Rect {
+pub fn centered_rect(width: u16, height: u16, area: Rect) -> Rect {
     let vertical_layout = Layout::default()
         .direction(Direction::Vertical)
         .constraints([
