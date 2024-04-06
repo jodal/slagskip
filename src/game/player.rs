@@ -16,7 +16,7 @@ impl Default for Player<Active> {
     fn default() -> Self {
         // Only used for test setup.
         Self {
-            stage: std::marker::PhantomData::<Active>,
+            stage: std::marker::PhantomData,
             name: "Default".into(),
             to_place: RefCell::new(vec![]),
             grid: Grid::new(10),
@@ -27,7 +27,7 @@ impl Default for Player<Active> {
 impl Player<New> {
     pub fn new(name: &str, grid_size: usize) -> Player<New> {
         Self {
-            stage: std::marker::PhantomData::<New>,
+            stage: std::marker::PhantomData,
             name: name.to_string(),
             to_place: RefCell::new(Ship::for_grid(grid_size)),
             grid: Grid::new(grid_size),
@@ -125,7 +125,7 @@ impl Player<New> {
         }
 
         Ok(Player {
-            stage: std::marker::PhantomData::<Active>,
+            stage: std::marker::PhantomData,
             name: self.name,
             to_place: self.to_place,
             grid: self.grid,

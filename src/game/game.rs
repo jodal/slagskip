@@ -15,7 +15,7 @@ impl Default for Game<Active> {
     fn default() -> Self {
         // Only used for test setup.
         Self {
-            stage: std::marker::PhantomData::<Active>,
+            stage: std::marker::PhantomData,
             grid_size: 10,
             players: vec![Player::<Active>::default(), Player::<Active>::default()],
         }
@@ -25,7 +25,7 @@ impl Default for Game<Active> {
 impl Game<New> {
     pub fn new(grid_size: usize) -> Game<New> {
         Self {
-            stage: std::marker::PhantomData::<New>,
+            stage: std::marker::PhantomData,
             grid_size,
             players: vec![],
         }
@@ -53,7 +53,7 @@ impl Game<New> {
             .collect();
 
         Ok(Game {
-            stage: std::marker::PhantomData::<Active>,
+            stage: std::marker::PhantomData,
             grid_size: self.grid_size,
             players,
         })
