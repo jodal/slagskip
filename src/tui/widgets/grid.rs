@@ -4,7 +4,7 @@ use ratatui::{
     widgets::Widget,
 };
 
-use crate::game::{Grid, Point};
+use crate::core::{Grid, Point};
 
 use super::CellWidget;
 

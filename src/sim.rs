@@ -1,6 +1,6 @@
 use eyre::Result;
 
-use crate::game::{Fire, Game, GameResult, Grid};
+use crate::core::{Fire, Game, GameResult, Grid};
 
 pub fn main() -> Result<()> {
     let mut game = Game::new(10);

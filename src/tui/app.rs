@@ -14,7 +14,7 @@ use ratatui::{
     Frame,
 };
 
-use crate::game::{Active, Game, GameResult};
+use crate::core::{Active, Game, GameResult};
 
 use super::{cursor::Cursor, terminal, widgets::PlayerWidget};
 

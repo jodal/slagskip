@@ -1,6 +1,6 @@
 use eyre::{eyre, Result};
 
-use crate::game::player::Player;
+use crate::core::player::Player;
 
 use super::{Active, New};
 

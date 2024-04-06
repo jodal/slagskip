@@ -5,7 +5,7 @@ mod widgets;
 
 use eyre::Result;
 
-use crate::game::Game;
+use crate::core::Game;
 
 use self::app::App;
 

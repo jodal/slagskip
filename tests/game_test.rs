@@ -1,5 +1,5 @@
 use eyre::Result;
-use slagskip::game::{Direction, Game, GameResult, Point, Ship};
+use slagskip::core::{Direction, Game, GameResult, Point, Ship};
 
 #[test]
 fn one_ship_game() -> Result<()> {

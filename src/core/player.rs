@@ -174,7 +174,7 @@ impl Player<Active> {
 mod tests {
     use eyre::Result;
 
-    use crate::game::{Direction, Ship};
+    use crate::core::{Direction, Ship};
 
     use super::*;
 

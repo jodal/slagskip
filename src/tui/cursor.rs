@@ -1,6 +1,6 @@
 use std::cmp::min;
 
-use crate::game::Point;
+use crate::core::Point;
 
 #[derive(Debug)]
 pub struct Cursor {

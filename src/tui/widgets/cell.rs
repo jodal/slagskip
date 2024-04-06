@@ -6,7 +6,7 @@ use ratatui::{
     widgets::{Block, Borders, Paragraph, Widget},
 };
 
-use crate::game::{Cell, Point};
+use crate::core::{Cell, Point};
 
 pub struct CellWidget<'a> {
     cell: &'a Cell,

@@ -1,4 +1,4 @@
-use crate::game::{Active, Player, Point};
+use crate::core::{Active, Player, Point};
 use crate::tui::app::centered_rect;
 use ratatui::style::{Color, Style};
 use ratatui::widgets::{Block, Gauge, Widget};
